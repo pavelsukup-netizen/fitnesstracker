@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trénink log</title>
+  <meta name="description" content="Mobilní tréninkový log s centrální databází cviků a historií progresu." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>Trénink log</h1>
+        <div class="sub">Mobilní verze draftu. Cviky drží historii centrálně, dny jsou jen rozpis.</div>
+      </div>
+      <div class="top-actions">
+        <button id="seedDemoBtn" class="warn">Nahrát demo data</button>
+        <button id="exportBtn">Export JSON</button>
+        <button id="importBtn">Import JSON</button>
+        <input id="importFile" type="file" accept="application/json" style="display:none" />
+        <button id="resetBtn" class="danger">Reset dat</button>
+      </div>
+    </div>
+
+    <div class="tabs" id="mainTabs"></div>
+
+    <section class="card">
+      <div class="card-head">
+        <h2 id="panelTitle">Pondělí</h2>
+        <div class="row" id="panelActions"></div>
+      </div>
+      <div class="card-body" id="panelBody"></div>
+    </section>
+  </div>
+
+  
+  <script src="./app.js"></script>
+</body>
+</html>
