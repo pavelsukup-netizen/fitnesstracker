@@ -3,23 +3,516 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trénink log</title>
-  <meta name="description" content="Mobilní tréninkový log s centrální databází cviků a historií progresu." />
-  <link rel="stylesheet" href="./styles.css" />
+  <title>Trénink log v6.4</title>
+  <style>
+    :root{
+      --bg:#0f1115;
+      --panel:#171a21;
+      --panel-2:#1f2430;
+      --line:#2d3443;
+      --text:#eef2f7;
+      --muted:#a9b3c3;
+      --accent:#5aa2ff;
+      --accent-2:#77e0b5;
+      --danger:#ff6b6b;
+      --warn:#ffcf5a;
+      --good:#63d471;
+      --radius:18px;
+      --shadow:0 10px 30px rgba(0,0,0,.28);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,#0d1016,#141925 40%,#0f1115);
+      color:var(--text);
+      overflow-x: hidden;
+    }
+    .wrap{max-width:1280px;margin:0 auto;padding:16px}
+    
+    .topbar{
+      display:flex;
+      gap:16px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:16px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      padding-bottom: 12px;
+    }
+    h1{margin:0;font-size:24px;font-weight: 800; background: linear-gradient(90deg, #fff, var(--muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
+    .sub{color:var(--muted);font-size:13px;margin-top:2px}
+    
+    .menu-trigger{
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      color: var(--text);
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .menu-trigger:hover{
+      background: #283041;
+      border-color: #41506b;
+    }
+
+    .drawer-overlay{
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+    .drawer-overlay.open{
+      opacity: 1;
+      visibility: visible;
+    }
+    .drawer{
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100%;
+      background: var(--panel);
+      border-left: 1px solid var(--line);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .drawer.open{
+      right: 0;
+    }
+    .drawer-head{
+      padding: 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .drawer-head h3{
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .drawer-close{
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .drawer-close:hover{
+      color: var(--text);
+    }
+    .drawer-body{
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-grow: 1;
+    }
+    .drawer-body button{
+      width: 100%;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .drawer-footer{
+      padding: 20px;
+      border-top: 1px solid var(--line);
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    button,input,select{font:inherit;border:none;outline:none}
+    button{background:var(--panel-2);color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;border:1px solid var(--line);transition:.18s transform,.18s background,.18s border-color}
+    button:hover{transform:translateY(-1px);background:#283041;border-color:#41506b}
+    button.primary{background:var(--accent);color:#09111f;border-color:transparent;font-weight:800}
+    button.good{background:rgba(99,212,113,.14);border-color:rgba(99,212,113,.28);color:#d8ffe0}
+    button.warn{background:rgba(255,207,90,.12);border-color:rgba(255,207,90,.25);color:#fff0b3}
+    button.danger{background:rgba(255,107,107,.12);border-color:rgba(255,107,107,.25);color:#ffdada}
+    button.secondary{background:#11161f}
+    .icon-btn{padding:9px 11px;min-width:44px;text-align:center}
+    .card{background:rgba(23,26,33,.92);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .card h2{margin:0;font-size:18px}
+    .card-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+    .card-body{padding:16px 18px}
+    .field{display:flex;flex-direction:column;gap:7px}
+    label{font-size:13px;color:var(--muted)}
+    input,select{background:#0f141d;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .day-tabs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-bottom:10px}
+    .db-tab-wrap{margin-bottom:16px}
+    .db-tab-wrap .tab-btn{width:100%}
+    .tab-btn{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:left;min-height:76px;cursor:pointer}
+    .tab-btn.active{background:linear-gradient(180deg,#1e2633,#18202c);border-color:#4c6b93}
+    .tab-name{font-weight:800}
+    .tab-name-short{display:none}
+    .tab-meta{font-size:12px;color:var(--muted);margin-top:6px}
+    .exercise-list{display:flex;flex-direction:column;gap:14px}
+    
+    .exercise-card{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#151a23,#11161e);overflow:hidden}
+    .exercise-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+    .exercise-title{font-size:18px;font-weight:800}
+    .badge{padding:6px 10px;border-radius:999px;font-size:12px;background:#212938;color:var(--muted);border:1px solid var(--line)}
+    
+    /* Zlatý PR odznak */
+    .pr-badge {
+      background: rgba(255, 207, 90, 0.08);
+      border: 1px solid rgba(255, 207, 90, 0.25);
+      color: var(--warn);
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .muted{color:var(--muted)}
+    .sets{padding:16px;display:grid;gap:12px}
+    .set-row{display:grid;grid-template-columns:86px 1fr 1fr 220px;gap:12px;align-items:center}
+    .set-row.bw{grid-template-columns:86px 1fr 220px}
+    .set-label{font-weight:700;color:var(--muted)}
+    .value-control{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;gap:6px;align-items:center}
+    .value-control input{padding:10px 8px;text-align:center;min-width:0}
+    .step-btn{padding:9px 0;min-width:40px;font-weight:800}
+
+    /* Pokročilý trend widget se silovým barometrem */
+    .trend-widget {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: #0f141d;
+      border: 1px solid var(--line);
+      font-size: 11px;
+      min-height: 52px;
+      width: 100%;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .trend-widget.up {
+      border-color: rgba(99,212,113,.25);
+      background: rgba(99,212,113,.03);
+    }
+    .trend-widget.down {
+      border-color: rgba(255,107,107,.25);
+      background: rgba(255,107,107,.03);
+    }
+    .trend-widget.same {
+      border-color: rgba(255,207,90,.25);
+      background: rgba(255,207,90,.03);
+    }
+    .trend-widget.mix {
+      border-color: rgba(90,162,255,.25);
+      background: rgba(90,162,255,.03);
+    }
+    .trend-widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+    }
+    .trend-pct {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    .trend-pct.up { color: #b9ffbe; background: rgba(99,212,113,.12); }
+    .trend-pct.down { color: #ffd1d1; background: rgba(255,107,107,.12); }
+    .trend-pct.same { color: #fff1c0; background: rgba(255,207,90,.12); }
+    .trend-pct.mix { color: #dce9ff; background: rgba(90,162,255,.12); }
+    
+    .trend-subtext {
+      color: var(--muted);
+      font-size: 10px;
+    }
+    .trend-bar-track {
+      height: 4px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 999px;
+      overflow: hidden;
+      width: 100%;
+      position: relative;
+    }
+    /* Značka 100% (minulého tréninku) */
+    .trend-bar-track::after {
+      content: '';
+      position: absolute;
+      left: 75%;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: rgba(255,255,255,0.35);
+      z-index: 2;
+    }
+    .trend-bar {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .trend-widget-footer {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 9px;
+    }
+    .trend-pr-tag {
+      color: var(--warn);
+      font-weight: 600;
+    }
+
+    /* Oddělené metriky pro váhu a opakování */
+    .trend-metrics{
+      display:grid;
+      gap:7px;
+    }
+    .trend-metric-row{
+      display:grid;
+      grid-template-columns:52px 1fr auto;
+      gap:8px;
+      align-items:center;
+    }
+    .trend-metric-label{
+      color:var(--muted);
+      font-size:10px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+    .metric-bar-track{
+      height:6px;
+      background:rgba(255,255,255,0.06);
+      border-radius:999px;
+      overflow:hidden;
+      position:relative;
+    }
+    .metric-bar-track::after{
+      content:'';
+      position:absolute;
+      left:75%;
+      top:0;
+      width:2px;
+      height:100%;
+      background:rgba(255,255,255,0.28);
+      z-index:2;
+    }
+    .metric-bar-fill{
+      height:100%;
+      border-radius:999px;
+      transition:width .25s ease;
+    }
+    .trend-metric-value{
+      min-width:58px;
+      text-align:right;
+      font-size:10px;
+      font-weight:800;
+    }
+    .trend-metric-value.up{color:#b9ffbe}
+    .trend-metric-value.down{color:#ffd1d1}
+    .trend-metric-value.same{color:#fff1c0}
+    .trend-metric-value.mix{color:#dce9ff}
+    .trend-widget-note{
+      color:var(--muted);
+      font-size:9px;
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+
+    @keyframes slideIn {
+      from { transform: translateY(100px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(100px); opacity: 0; }
+    }
+
+    /* Čistý potvrzovací modal */
+    .confirm-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .confirm-modal-box {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: var(--shadow);
+      animation: modalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes modalIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    @media (max-width: 1100px){
+      .day-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+    }
+    @media (max-width: 820px){
+      .day-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+      .form-grid,.history-grid,.workout-summary,.picker-grid{grid-template-columns:1fr}
+      .set-row{grid-template-columns:1fr 1fr}
+      .set-row.bw{grid-template-columns:1fr 1fr}
+      .set-label{grid-column:1/-1}
+      .trend-widget{grid-column:1/-1}
+    }
+
+    @media (max-width: 620px){
+      .wrap{padding:10px}
+      h1{font-size:20px}
+      .sub{font-size:12px}
+
+      .topbar{gap:10px;margin-bottom:12px;padding-bottom:10px}
+
+      .day-tabs{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+      .tab-btn{min-height:54px;padding:6px 2px;text-align:center;border-radius:10px}
+      .tab-name-full{display:none}
+      .tab-name-short{display:block;font-size:13px}
+      .tab-meta{font-size:9px;margin-top:2px}
+
+      .workout-summary{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:6px;margin:12px 0}
+      .metric-card{padding:8px 4px;text-align:center}
+      .metric-title{font-size:9px;letter-spacing:0}
+      .metric-value{font-size:14px;font-weight:800;margin-top:2px}
+      .metric-sub{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+      .picker-grid{grid-template-columns:1fr 1fr;gap:8px}
+      .picker-actions{margin-top:8px;gap:6px}
+      .picker-actions select{padding:8px 10px;font-size:13px}
+      .picker-actions button{padding:8px 12px;font-size:13px}
+
+      .card-head, .card-body{padding:12px}
+      .exercise-head{padding:10px 12px;flex-direction:column;align-items:flex-start;gap:8px}
+      .exercise-title{font-size:16px}
+      .exercise-head .row{width:100%;justify-content:space-between;gap:4px;flex-wrap:wrap}
+      .exercise-head button{flex:1 1 auto;padding:6px 8px;font-size:11px;min-width:auto;height:32px}
+      .exercise-head .badge, .exercise-head .pr-badge{padding:4px 8px;font-size:11px}
+
+      .sets{padding:10px;gap:8px}
+      .set-row{
+        grid-template-columns:40px 1fr 1fr !important;
+        grid-template-rows:auto auto;
+        gap:6px 4px !important;
+        align-items:center;
+      }
+      .set-row.bw{
+        grid-template-columns:40px 1fr !important;
+        grid-template-rows:auto auto;
+      }
+      .set-label{grid-row:1;grid-column:1;font-size:12px}
+      
+      .value-control{
+        grid-row:1;
+        grid-template-columns:28px minmax(0,1fr) 28px !important;
+        gap:2px;
+      }
+      .value-control input{padding:6px 2px;font-size:14px;height:32px}
+      .step-btn{min-width:28px;height:32px;padding:0;font-size:14px}
+
+      .trend-widget{
+        grid-row:2;
+        grid-column:1 / -1;
+        min-height:auto;
+        padding:8px 10px;
+        font-size:11px;
+        justify-content:flex-start;
+        border-radius:10px;
+        margin-top:4px;
+      }
+
+      .form-grid{grid-template-columns:1fr;gap:8px}
+      .db-item{padding:10px;gap:8px;flex-direction:column;align-items:stretch}
+      .db-item-head{width:100%}
+      .db-item-controls{width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:4px}
+      .db-item-controls button{grid-column:1 / -1}
+      
+      #toastContainer {
+        bottom: 12px;
+        right: 12px;
+        left: 12px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="wrap">
     <div class="topbar">
       <div>
         <h1>Trénink log</h1>
-        <div class="sub">Mobilní verze draftu. Cviky drží historii centrálně, dny jsou jen rozpis.</div>
+        <div class="sub">Vyladěná mobilní verze se silovým barometrem pro rychlý zápis.</div>
       </div>
-      <div class="top-actions">
-        <button id="seedDemoBtn" class="warn">Nahrát demo data</button>
-        <button id="exportBtn">Export JSON</button>
-        <button id="importBtn">Import JSON</button>
+      <button class="menu-trigger" id="openDrawerBtn" title="Nastavení a správa">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Boční vysunovací panel (Drawer) -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="drawer" id="drawer">
+      <div class="drawer-head">
+        <h3>Systém a data</h3>
+        <button class="drawer-close" id="closeDrawerBtn">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <button id="seedDemoBtn" class="warn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; margin-right:8px;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Nahrát demo data
+        </button>
+        <button id="exportBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; margin-right:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          Export JSON
+        </button>
+        <button id="importBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; margin-right:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Import JSON
+        </button>
         <input id="importFile" type="file" accept="application/json" style="display:none" />
-        <button id="resetBtn" class="danger">Reset dat</button>
+        <button id="resetBtn" class="danger">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; margin-right:8px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          Resetovat celou aplikaci
+        </button>
+      </div>
+      <div class="drawer-footer">
+        Trénink log v6.4 · Sanny Studio<br>
+        Lokální data v prohlížeči.
       </div>
     </div>
 
@@ -34,7 +527,1033 @@
     </section>
   </div>
 
-  
-  <script src="./app.js"></script>
+  <!-- Kontejnery pro toasty a custom konfirmační okna -->
+  <div id="toastContainer"></div>
+
+  <div id="confirmModal" class="confirm-modal-overlay" style="display:none;">
+    <div class="confirm-modal-box">
+      <h3 id="confirmTitle" style="margin:0 0 12px 0; font-size:18px; font-weight:800;">Potvrdit akci</h3>
+      <p id="confirmMessage" style="margin:0 0 24px 0; font-size:14px; color:var(--muted); line-height:1.5;"></p>
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button id="confirmCancelBtn" class="secondary" style="padding:10px 16px;">Zrušit</button>
+        <button id="confirmOkBtn" class="primary" style="padding:10px 16px; background:var(--danger); color:var(--text);">Provést</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'trainingLogApp_v6_active';
+    const LEGACY_KEYS = ['trainingLogApp_v6', 'trainingLogApp_v5','trainingLogApp_v4','trainingLogApp_v3'];
+    const DAYS = [
+      { key: 'mon', label: 'Pondělí', short: 'po' },
+      { key: 'tue', label: 'Úterý', short: 'út' },
+      { key: 'wed', label: 'Středa', short: 'st' },
+      { key: 'thu', label: 'Čtvrtek', short: 'čt' },
+      { key: 'fri', label: 'Pátek', short: 'pá' },
+      { key: 'sat', label: 'Sobota', short: 'so' },
+      { key: 'sun', label: 'Neděle', short: 'ne' },
+    ];
+    const DATABASE_TAB = 'db';
+
+    let state = loadState();
+    let activeTab = DAYS[0].key;
+
+    // Kód pro ovládání vysunovacího bočního menu
+    const drawer = document.getElementById('drawer');
+    const drawerOverlay = document.getElementById('drawerOverlay');
+    const openDrawerBtn = document.getElementById('openDrawerBtn');
+    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+
+    function toggleDrawer() {
+      drawer.classList.toggle('open');
+      drawerOverlay.classList.toggle('open');
+    }
+
+    openDrawerBtn.addEventListener('click', toggleDrawer);
+    closeDrawerBtn.addEventListener('click', toggleDrawer);
+    drawerOverlay.addEventListener('click', toggleDrawer);
+
+    function uid() {
+      return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+    }
+
+    // Toast systém
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        padding: 12px 18px;
+        border-radius: 12px;
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        color: var(--text);
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        font-size: 13px;
+        font-weight: 600;
+        pointer-events: auto;
+      `;
+      if (type === 'error') {
+        toast.style.borderColor = 'var(--danger)';
+        toast.style.background = 'rgba(255,107,107,0.08)';
+      } else if (type === 'success') {
+        toast.style.borderColor = 'var(--good)';
+        toast.style.background = 'rgba(99,212,113,0.08)';
+      } else if (type === 'warn') {
+        toast.style.borderColor = 'var(--warn)';
+        toast.style.background = 'rgba(255,207,90,0.08)';
+      }
+      toast.innerHTML = msg;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // Confirm dialog systém
+    let confirmCallback = null;
+    function showConfirm(msg, callback, isDanger = false) {
+      confirmCallback = callback;
+      document.getElementById('confirmMessage').textContent = msg;
+      const okBtn = document.getElementById('confirmOkBtn');
+      if (isDanger) {
+        okBtn.style.background = 'var(--danger)';
+        okBtn.textContent = 'Smazat/Resetovat';
+      } else {
+        okBtn.style.background = 'var(--accent)';
+        okBtn.textContent = 'Potvrdit';
+      }
+      document.getElementById('confirmModal').style.display = 'flex';
+    }
+
+    document.getElementById('confirmCancelBtn').addEventListener('click', () => {
+      document.getElementById('confirmModal').style.display = 'none';
+      confirmCallback = null;
+    });
+    document.getElementById('confirmOkBtn').addEventListener('click', () => {
+      document.getElementById('confirmModal').style.display = 'none';
+      if (confirmCallback) confirmCallback();
+      confirmCallback = null;
+    });
+
+    function defaultExercise(name, part='', trackMode='both', valueMode='weight') {
+      return {
+        id: uid(),
+        name: name.trim(),
+        part: part.trim(),
+        trackMode,
+        valueMode,
+        history: []
+      };
+    }
+
+    function defaultState() {
+      return {
+        schemaVersion: 6,
+        exercises: [],
+        ui: {
+          dbPartFilter: 'all',
+          dbSearch: '',
+          dayPartFilters: Object.fromEntries(DAYS.map(d => [d.key, 'all'])),
+          dayExerciseSearch: Object.fromEntries(DAYS.map(d => [d.key, '']))
+        },
+        draftDays: Object.fromEntries(DAYS.map(d => [d.key, {}])),
+        workouts: [],
+        days: Object.fromEntries(DAYS.map(d => [d.key, { items: [] }]))
+      };
+    }
+
+    function migrateState(parsed) {
+      const base = defaultState();
+      base.exercises = Array.isArray(parsed.exercises) ? parsed.exercises.map(ex => ({
+        id: ex.id || uid(),
+        name: ex.name || 'Bez názvu',
+        part: (ex.part || ex.category || '').trim(),
+        trackMode: ex.trackMode || 'both',
+        valueMode: ex.valueMode || 'weight',
+        history: Array.isArray(ex.history) ? ex.history.map(h => ({
+          id: h.id || uid(),
+          date: h.date || new Date().toISOString(),
+          dayKey: h.dayKey || 'mon',
+          setIndex: Math.max(1, Number(h.setIndex) || 1),
+          weight: h.weight === 'BW' ? null : (h.weight ?? null),
+          reps: Number(h.reps) || 0
+        })) : []
+      })) : [];
+
+      for (const d of DAYS) {
+        const bucket = parsed.days?.[d.key];
+        if (bucket?.items && Array.isArray(bucket.items)) {
+          base.days[d.key].items = bucket.items.map(item => ({
+            exerciseId: item.exerciseId,
+            setCount: Math.max(1, Number(item.setCount || 1))
+          }));
+        }
+      }
+
+      if (parsed.draftDays && typeof parsed.draftDays === 'object') {
+        for (const d of DAYS) {
+          const src = parsed.draftDays[d.key] || {};
+          base.draftDays[d.key] = {};
+          for (const [exerciseId, sets] of Object.entries(src)) {
+            base.draftDays[d.key][exerciseId] = Array.isArray(sets) ? sets.map(s => ({
+              weight: s?.weight ?? '',
+              reps: s?.reps ?? ''
+            })) : [];
+          }
+        }
+      }
+
+      base.workouts = Array.isArray(parsed.workouts) ? parsed.workouts.map(w => ({
+        id: w.id || uid(),
+        date: w.date || new Date().toISOString(),
+        dayKey: w.dayKey || 'mon',
+        totalVolume: Number(w.totalVolume) || 0,
+        setsCount: Number(w.setsCount) || 0,
+        exerciseCount: Number(w.exerciseCount) || 0
+      })) : [];
+
+      return base;
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY) || LEGACY_KEYS.map(k => localStorage.getItem(k)).find(Boolean);
+        if (!raw) return defaultState();
+        return migrateState(JSON.parse(raw));
+      } catch (e) {
+        console.error(e);
+        return defaultState();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function escapeHtml(str) {
+      return String(str).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+    }
+
+    function findExercise(id) { return state.exercises.find(x => x.id === id); }
+    function findDayItem(dayKey, exerciseId) { return state.days[dayKey].items.find(x => x.exerciseId === exerciseId); }
+    function uniqueParts() { return [...new Set(state.exercises.map(ex => (ex.part || '').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'cs')); }
+
+    function addExercise(name, part='', trackMode='both', valueMode='weight') {
+      const clean = name.trim();
+      if (!clean) return showToast('Zadej název cviku.', 'error');
+      if (state.exercises.some(x => x.name.toLowerCase() === clean.toLowerCase())) return showToast('Tenhle cvik už v databázi je.', 'warn');
+      state.exercises.push(defaultExercise(clean, part, trackMode, valueMode));
+      saveState();
+      showToast('Cvik úspěšně přidán do centrální DB!', 'success');
+      render();
+    }
+
+    function deleteExercise(id) {
+      const ex = findExercise(id);
+      if (!ex) return;
+      showConfirm(`Opravdu chcete smazat cvik „${ex.name}“ včetně celé historie progresu?`, () => {
+        state.exercises = state.exercises.filter(x => x.id !== id);
+        for (const d of DAYS) {
+          state.days[d.key].items = state.days[d.key].items.filter(x => x.exerciseId !== id);
+          delete state.draftDays[d.key][id];
+        }
+        saveState();
+        showToast('Cvik byl odstraněn ze systému.', 'info');
+        render();
+      }, true);
+    }
+
+    function updateExerciseConfig(id, patch) {
+      const ex = findExercise(id);
+      if (!ex) return;
+      Object.assign(ex, patch);
+      saveState();
+      render();
+    }
+
+    // Definování hlavní struktury pro srovnávání a progres bar celkového dne
+    function calculateTotalVolumeBarometer(dayKey, draftVolume) {
+      const last = lastWorkoutForDay(dayKey);
+      const dayWorkouts = state.workouts.filter(w => w.dayKey === dayKey);
+      const prVolume = dayWorkouts.length ? Math.max(...dayWorkouts.map(w => w.totalVolume)) : 0;
+      const lastVolume = last ? last.totalVolume : 0;
+
+      // Prvni trenink pro dany den
+      if (!last) {
+        return {
+          cls: 'same',
+          pctText: 'Nová řada',
+          pctClass: 'same',
+          subtext: 'Založ první trénink!',
+          barWidth: 75,
+          barColor: 'var(--accent)',
+          prevPerf: '—',
+          prPerf: prVolume ? `${prVolume} kg` : '—'
+        };
+      }
+
+      let diffPct = 0;
+      if (lastVolume > 0) {
+        diffPct = ((draftVolume - lastVolume) / lastVolume) * 100;
+      }
+
+      let cls = 'same';
+      let pctClass = 'same';
+      let pctText = '0.0%';
+      let barColor = 'var(--accent)';
+      let barWidth = 75; // Ryska 100% minulého tréninku je na 75% šířky
+
+      if (diffPct > 0) {
+        cls = 'up';
+        pctClass = 'up';
+        pctText = `+${diffPct.toFixed(1)}%`;
+        barColor = 'var(--good)';
+        barWidth = Math.min(100, 75 + (diffPct * 0.8));
+      } else if (diffPct < 0) {
+        cls = 'down';
+        pctClass = 'down';
+        pctText = `${diffPct.toFixed(1)}%`;
+        barColor = 'var(--danger)';
+        barWidth = Math.max(10, 75 + (diffPct * 0.75));
+      } else {
+        cls = 'same';
+        pctClass = 'same';
+        pctText = '0.0%';
+        barColor = 'var(--warn)';
+        barWidth = 75;
+      }
+
+      let subtext = 'Sledování trendu dne';
+      if (prVolume > 0) {
+        const prRatio = (draftVolume / prVolume) * 100;
+        if (draftVolume >= prVolume && draftVolume > 0) {
+          subtext = '🏆 NOVÝ REKORD DNE!';
+          cls = 'up';
+          pctClass = 'up';
+          barColor = 'var(--good)';
+        } else {
+          subtext = `${Math.min(100, Math.round(prRatio))}% z PR dne`;
+        }
+      }
+
+      return {
+        cls,
+        pctText,
+        pctClass,
+        subtext,
+        barWidth,
+        barColor,
+        prevPerf: `${lastVolume} kg`,
+        prPerf: prVolume ? `${prVolume} kg` : '—'
+      };
+    }
+
+    function ensureDraftSlots(dayKey, exerciseId, setCount) {
+      if (!state.draftDays[dayKey][exerciseId]) state.draftDays[dayKey][exerciseId] = [];
+      const arr = state.draftDays[dayKey][exerciseId];
+      while (arr.length < setCount) arr.push({ weight: '', reps: '' });
+      if (arr.length > setCount) arr.length = setCount;
+    }
+
+    function assignExerciseToDay(dayKey, exerciseId) {
+      if (!exerciseId) return showToast('Nejdřív vyber cvik k zařazení.', 'warn');
+      const bucket = state.days[dayKey].items;
+      if (bucket.some(x => x.exerciseId === exerciseId)) return showToast('Tenhle cvik už v dnešním plánu máš.', 'warn');
+      bucket.push({ exerciseId, setCount: 1 });
+      ensureDraftSlots(dayKey, exerciseId, 1);
+      saveState();
+      showToast('Cvik přidán do dnešního tréninku.', 'success');
+      render();
+    }
+
+    function unassignExerciseFromDay(dayKey, exerciseId) {
+      state.days[dayKey].items = state.days[dayKey].items.filter(x => x.exerciseId !== exerciseId);
+      delete state.draftDays[dayKey][exerciseId];
+      saveState();
+      showToast('Cvik byl odebrán z dnešního tréninku.', 'info');
+      render();
+    }
+
+    function addSetToDayExercise(dayKey, exerciseId) {
+      const item = findDayItem(dayKey, exerciseId);
+      if (!item) return;
+      item.setCount = Math.max(1, Number(item.setCount || 1) + 1);
+      ensureDraftSlots(dayKey, exerciseId, item.setCount);
+      saveState();
+      render();
+    }
+
+    function removeSetFromDayExercise(dayKey, exerciseId) {
+      const item = findDayItem(dayKey, exerciseId);
+      if (!item) return;
+      item.setCount = Math.max(1, Number(item.setCount || 1) - 1);
+      ensureDraftSlots(dayKey, exerciseId, item.setCount);
+      saveState();
+      render();
+    }
+
+    function moveExerciseInDay(dayKey, exerciseId, direction) {
+      const items = state.days[dayKey].items;
+      const index = items.findIndex(x => x.exerciseId === exerciseId);
+      if (index === -1) return;
+      const target = direction === 'up' ? index - 1 : index + 1;
+      if (target < 0 || target >= items.length) return;
+      [items[index], items[target]] = [items[target], items[index]];
+      saveState();
+      render();
+    }
+
+    function updateExerciseDraftValue(dayKey, exerciseId, setIndex, field, step) {
+      const item = findDayItem(dayKey, exerciseId);
+      if (!item) return;
+      ensureDraftSlots(dayKey, exerciseId, item.setCount);
+      const current = state.draftDays[dayKey][exerciseId][setIndex - 1][field];
+      const currNum = Number(current || 0);
+      const next = Math.max(0, Math.round((currNum + step) * 100) / 100);
+      const value = field === 'weight' ? String(Number(next.toFixed(1))) : String(Math.round(next));
+      updateDraft(dayKey, exerciseId, setIndex, field, value);
+      render();
+    }
+
+    function updateDraft(dayKey, exerciseId, setIndex, field, value) {
+      const item = findDayItem(dayKey, exerciseId);
+      if (!item) return;
+      ensureDraftSlots(dayKey, exerciseId, item.setCount);
+      state.draftDays[dayKey][exerciseId][setIndex - 1][field] = value;
+      saveState();
+    }
+
+    function getLastEntryForSet(exercise, setIndex) {
+      const sorted = [...exercise.history].sort((a,b)=> new Date(b.date) - new Date(a.date));
+      return sorted.find(entry => Number(entry.setIndex) === Number(setIndex));
+    }
+
+
+// Oddělený výpočet trendu pro váhu a opakování.
+// Starý společný bar míchal kg a reps do jednoho skóre, což zkreslovalo situace typu:
+// vyšší váha, ale méně opakování.
+function getBestMetricValue(exercise, metric) {
+  if (!exercise.history.length) return null;
+  const values = exercise.history
+    .map(h => metric === 'weight' ? Number(h.weight) : Number(h.reps))
+    .filter(v => Number.isFinite(v) && v > 0);
+  return values.length ? Math.max(...values) : null;
+}
+
+function metricTrend(current, previous, pr, unit) {
+  const curr = Number(current) || 0;
+  const prev = Number(previous) || 0;
+  const personalRecord = Number(pr) || 0;
+
+  if (!prev) {
+    return {
+      cls: curr ? 'same' : 'same',
+      text: curr ? `${curr}${unit}` : '—',
+      subtext: curr ? 'první zápis' : 'čeká na vstup',
+      barWidth: curr ? 75 : 8,
+      color: curr ? 'var(--accent)' : 'rgba(255,255,255,.18)'
+    };
+  }
+
+  const diff = curr - prev;
+  const diffPct = prev ? (diff / prev) * 100 : 0;
+  let cls = 'same';
+  let color = 'var(--warn)';
+  if (diff > 0) { cls = 'up'; color = 'var(--good)'; }
+  if (diff < 0) { cls = 'down'; color = 'var(--danger)'; }
+  const barWidth = Math.max(8, Math.min(100, 75 + (diffPct * 0.8)));
+  const sign = diff > 0 ? '+' : '';
+  const text = `${sign}${diff}${unit}`;
+  let subtext = `minule ${prev}${unit}`;
+  if (personalRecord && curr >= personalRecord && curr > 0) {
+    subtext = `🏆 PR ${personalRecord}${unit}`;
+    cls = 'up';
+    color = 'var(--good)';
+  }
+  return { cls, text, subtext, barWidth, color };
+}
+
+function combineTrendClass(weightTrend, repsTrend, isBW) {
+  const trends = isBW ? [repsTrend.cls] : [weightTrend.cls, repsTrend.cls];
+  const hasUp = trends.includes('up');
+  const hasDown = trends.includes('down');
+  if (hasUp && hasDown) return 'mix';
+  if (hasUp) return 'up';
+  if (hasDown) return 'down';
+  return 'same';
+}
+
+function calculateSetBarometer(exercise, setIndex, currentWeight, currentReps) {
+  const prev = getLastEntryForSet(exercise, setIndex);
+  const isBW = exercise.valueMode === 'bw';
+  const weight = isBW ? null : (currentWeight === '' || currentWeight == null ? 0 : Number(currentWeight));
+  const reps = Number(currentReps) || 0;
+
+  const previousWeight = prev && !isBW ? Number(prev.weight) || 0 : 0;
+  const previousReps = prev ? Number(prev.reps) || 0 : 0;
+  const bestWeight = isBW ? null : getBestMetricValue(exercise, 'weight');
+  const bestReps = getBestMetricValue(exercise, 'reps');
+
+  const weightTrend = isBW ? null : metricTrend(weight, previousWeight, bestWeight, 'kg');
+  const repsTrend = metricTrend(reps, previousReps, bestReps, 'r');
+  const cls = combineTrendClass(weightTrend, repsTrend, isBW);
+
+  let headline = 'Nový zápis';
+  if (prev) {
+    if (isBW) headline = `Reps: ${previousReps} → ${reps || '—'}`;
+    else headline = `Kg: ${previousWeight} → ${weight || '—'} · reps: ${previousReps} → ${reps || '—'}`;
+  }
+
+  return {
+    cls,
+    headline,
+    weightTrend,
+    repsTrend,
+    prevPerf: prev ? formatRecord(exercise, prev) : '—',
+    weightPR: bestWeight ? `${bestWeight}kg` : '—',
+    repsPR: bestReps ? `${bestReps}r` : '—'
+  };
+}
+
+function renderSetTrendWidget(ex, setNo, draft) {
+  const trend = calculateSetBarometer(ex, setNo, draft.weight, draft.reps);
+  const isBW = ex.valueMode === 'bw';
+  const weightRow = isBW ? '' : `
+    <div class="trend-metric-row">
+      <div class="trend-metric-label">Váha</div>
+      <div class="metric-bar-track"><div class="metric-bar-fill" style="width:${trend.weightTrend.barWidth}%;background:${trend.weightTrend.color};"></div></div>
+      <div class="trend-metric-value ${trend.weightTrend.cls}">${trend.weightTrend.text}</div>
+    </div>
+  `;
+  return `
+    <div class="trend-widget ${trend.cls}" data-exercise-trend="${ex.id}" data-set-trend="${setNo}">
+      <div class="trend-widget-header">
+        <span>${trend.headline}</span>
+        <span class="trend-pct ${trend.cls}">${trend.cls === 'mix' ? 'MIX' : trend.cls === 'up' ? '↑' : trend.cls === 'down' ? '↓' : '→'}</span>
+      </div>
+      <div class="trend-metrics">
+        ${weightRow}
+        <div class="trend-metric-row">
+          <div class="trend-metric-label">Reps</div>
+          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:${trend.repsTrend.barWidth}%;background:${trend.repsTrend.color};"></div></div>
+          <div class="trend-metric-value ${trend.repsTrend.cls}">${trend.repsTrend.text}</div>
+        </div>
+      </div>
+      <div class="trend-widget-note">
+        <span>Minule: ${trend.prevPerf}</span>
+        <span>PR: ${isBW ? trend.repsPR : `${trend.weightPR} / ${trend.repsPR}`}</span>
+      </div>
+    </div>
+  `;
+}
+
+function calcDraftWorkoutVolume(dayKey) {
+      const items = state.days[dayKey].items;
+      let total = 0, sets = 0;
+      for (const item of items) {
+        const ex = findExercise(item.exerciseId);
+        if (!ex) continue;
+        ensureDraftSlots(dayKey, ex.id, item.setCount);
+        for (const setDraft of (state.draftDays[dayKey][ex.id] || [])) {
+          const reps = Number(setDraft.reps) || 0;
+          const weight = ex.valueMode === 'bw' ? 0 : (Number(setDraft.weight) || 0);
+          if (reps || weight) sets++;
+          total += weight * reps;
+        }
+      }
+      return { total, sets };
+    }
+
+    function lastWorkoutForDay(dayKey) {
+      const arr = [...(state.workouts || [])].filter(w => w.dayKey === dayKey).sort((a,b)=> new Date(b.date)-new Date(a.date));
+      return arr[0] || null;
+    }
+
+    function lastWorkoutsForDay(dayKey, limit=3) {
+      return [...(state.workouts || [])].filter(w => w.dayKey === dayKey).sort((a,b)=> new Date(b.date)-new Date(a.date)).slice(0, limit);
+    }
+
+    function formatKg(value) { return `${Math.round(Number(value) || 0).toLocaleString('cs-CZ')} kg`; }
+
+    function updateWorkoutPreview(dayKey) {
+      const container = document.getElementById('workoutSummaryContainer');
+      if (!container) return;
+      container.innerHTML = renderWorkoutSummary(dayKey);
+    }
+
+    function saveWholeWorkout(dayKey) {
+      const items = state.days[dayKey].items;
+      if (!items.length) return showToast('Tenhle tréninkový den je prázdný.', 'warn');
+      let records = [];
+      for (const item of items) {
+        const ex = findExercise(item.exerciseId);
+        if (!ex) continue;
+        ensureDraftSlots(dayKey, ex.id, item.setCount);
+        const drafts = state.draftDays[dayKey][ex.id];
+        for (let i = 0; i < item.setCount; i++) {
+          const setDraft = drafts[i] || { weight: '', reps: '' };
+          if (String(setDraft.reps).trim() === '' && String(setDraft.weight).trim() === '') continue;
+          if (!Number(setDraft.reps)) {
+            return showToast(`${ex.name} (Série ${i+1}): Vyplňte prosím počet opakování.`, 'error');
+          }
+          records.push({
+            exercise: ex,
+            setIndex: i + 1,
+            reps: Number(setDraft.reps),
+            weight: ex.valueMode === 'bw' ? null : Number(setDraft.weight)
+          });
+        }
+      }
+      if (!records.length) return showToast('Nemáš vyplněný vůbec žádný set k uložení.', 'warn');
+      
+      showConfirm(`Chcete uložit celý dnešní trénink o síle ${records.length} sérií?`, () => {
+        const now = new Date().toISOString();
+        const totalVolume = records.reduce((sum, rec) => sum + ((Number(rec.weight) || 0) * (Number(rec.reps) || 0)), 0);
+        const exerciseCount = new Set(records.map(rec => rec.exercise.id)).size;
+
+        for (const rec of records) {
+          rec.exercise.history.push({
+            id: uid(), date: now, dayKey, setIndex: rec.setIndex, weight: rec.weight, reps: rec.reps
+          });
+        }
+        state.workouts.push({ id: uid(), date: now, dayKey, totalVolume, setsCount: records.length, exerciseCount });
+        for (const item of items) {
+          state.draftDays[dayKey][item.exerciseId] = Array.from({ length: item.setCount }, () => ({ weight: '', reps: '' }));
+        }
+        saveState();
+        showToast(`Trénink úspěšně uložen! Celkem zvednuto: ${formatKg(totalVolume)}. Skvělá práce! 🏆`, 'success');
+        render();
+      });
+    }
+
+    function latestWorkoutDate(exerciseId) {
+      const ex = findExercise(exerciseId);
+      if (!ex || !ex.history.length) return null;
+      const max = ex.history.reduce((a,b)=> new Date(a.date) > new Date(b.date) ? a : b);
+      return new Date(max.date).toLocaleDateString('cs-CZ');
+    }
+
+    function countTabItems(tabKey) {
+      return tabKey === DATABASE_TAB ? state.exercises.length : state.days[tabKey].items.length;
+    }
+
+    function formatRecord(ex, h) { return ex.valueMode === 'bw' ? `${h.reps} reps` : `${h.weight} kg × ${h.reps}`; }
+    
+    // Silové skóre: buď celkový objem, nebo čisté reps u BW cviků
+    function scoreRecord(ex, h) { 
+      if (!h) return 0;
+      if (ex.valueMode === 'bw') return Number(h.reps) || 0;
+      return (Number(h.weight) || 0) * (Number(h.reps) || 0) || Number(h.reps); 
+    }
+
+    function bestWorstRecords(ex) {
+      if (!ex.history.length) return { best: null, worst: null };
+      const arr = [...ex.history].sort((a,b) => scoreRecord(ex,b) - scoreRecord(ex,a));
+      return { best: arr[0], worst: arr[arr.length - 1] };
+    }
+
+    function renderTabs() {
+      const el = document.getElementById('mainTabs');
+      const dayTabs = DAYS.map(t => `
+        <button class="tab-btn ${t.key === activeTab ? 'active' : ''}" data-tab="${t.key}">
+          <div class="tab-name tab-name-full">${t.label}</div>
+          <div class="tab-name tab-name-short">${t.short}</div>
+          <div class="tab-meta">${countTabItems(t.key)}</div>
+        </button>
+      `).join('');
+      el.innerHTML = `
+        <div class="day-tabs">${dayTabs}</div>
+        <div class="db-tab-wrap">
+          <button class="tab-btn ${activeTab === DATABASE_TAB ? 'active' : ''}" data-tab="${DATABASE_TAB}">
+            <div class="tab-name">Centrální databáze všech cviků</div>
+            <div class="tab-meta">${countTabItems(DATABASE_TAB)} cviků v systému</div>
+          </button>
+        </div>
+      `;
+      el.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => { activeTab = btn.dataset.tab; render(); }));
+    }
+
+    function renderPanel() {
+      const title = document.getElementById('panelTitle');
+      const actions = document.getElementById('panelActions');
+      const body = document.getElementById('panelBody');
+      if (activeTab === DATABASE_TAB) {
+        title.textContent = 'Centrální databáze cviků';
+        actions.innerHTML = `<span class="pill">${state.exercises.length} definovaných cviků</span>`;
+        body.innerHTML = renderDatabasePanel();
+        bindDatabasePanel();
+        return;
+      }
+      const dayObj = DAYS.find(x => x.key === activeTab);
+      title.textContent = dayObj.label;
+      actions.innerHTML = `<span class="pill">Autosave draftu aktivní</span>`;
+      body.innerHTML = renderDayPanel(dayObj);
+      bindDayPanel(dayObj.key);
+    }
+
+    function renderPartOptions(selected='all') {
+      return `<option value="all" ${selected==='all'?'selected':''}>Všechny partie</option>` + uniqueParts().map(part => `<option value="${escapeHtml(part)}" ${selected===part?'selected':''}>${escapeHtml(part)}</option>`).join('');
+    }
+
+    // JEDINÁ HLAVNÍ METODA PRO SUMÁŘ TRÉNINKU (obsahuje silový barometr celého dne)
+    function renderWorkoutSummary(dayKey) {
+      const draft = calcDraftWorkoutVolume(dayKey);
+      const last = lastWorkoutForDay(dayKey);
+      const trend = calculateTotalVolumeBarometer(dayKey, draft.total);
+      return `
+        <div class="workout-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0;">
+          <div class="metric-card" style="padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,0.2);">
+            <div class="metric-title" style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Aktuální objem</div>
+            <div class="metric-value" id="workoutVolumeValue" style="font-size: 16px; font-weight: 800; margin-top: 4px;">${formatKg(draft.total)}</div>
+            <div class="metric-sub" id="workoutVolumeSub" style="font-size: 10px; color: var(--muted); margin-top: 2px;">${draft.sets} vyplněných setů</div>
+          </div>
+          
+          <!-- Celkový silový barometr dne -->
+          <div class="metric-card" style="padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,0.2); grid-column: span 1;">
+            <div class="metric-title" style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Silový Barometr dne</div>
+            <div class="trend-widget ${trend.cls}" style="margin-top: 6px; border: none; background: transparent; padding: 0; min-height: auto; width: 100%;">
+              <div class="trend-widget-header" style="margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+                <span class="trend-pct ${trend.pctClass}" style="font-size: 10px; font-weight: 800; padding: 1px 5px; border-radius: 4px;">${trend.pctText}</span>
+                <span class="trend-subtext" style="font-size: 9px; color: var(--muted);">${trend.subtext}</span>
+              </div>
+              <div class="trend-bar-track" style="height: 4px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; width: 100%; position: relative;">
+                <div style="position: absolute; left: 75%; top: 0; width: 2px; height: 100%; background: rgba(255,255,255,0.35); z-index: 2;"></div>
+                <div class="trend-bar" style="width: ${trend.barWidth}%; background-color: ${trend.barColor}; height: 100%; border-radius: 999px;"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="metric-card" style="padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,0.2);">
+            <div class="metric-title" style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Počet cviků</div>
+            <div class="metric-value" style="font-size: 16px; font-weight: 800; margin-top: 4px;">${state.days[dayKey].items.length}</div>
+            <div class="metric-sub" style="font-size: 10px; color: var(--muted); margin-top: 2px;">Připraveno na dnes</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDayPanel(dayObj) {
+      const filterPart = state.ui.dayPartFilters[dayObj.key] || 'all';
+      const items = state.days[dayObj.key].items;
+      return `
+        <!-- Obal pro hladký real-time update celkového počítadla -->
+        <div id="workoutSummaryContainer">
+          ${renderWorkoutSummary(dayObj.key)}
+        </div>
+        <div class="exercise-picker">
+          <div class="picker-grid">
+            <div class="field"><label>Filtrovat podle svalů</label><select id="dayPartFilter">${renderPartOptions(filterPart)}</select></div>
+            <div class="field"><label>Vyhledat cvik pro vložení</label><input id="assignExerciseSearch" placeholder="Hledej v DB..." value="${escapeHtml(state.ui.dayExerciseSearch?.[dayObj.key] || '')}" /></div>
+          </div>
+          <div class="picker-actions">
+            <select id="assignExerciseSelect"></select>
+            <button id="assignExerciseBtn" class="primary">Přidat do dnešního tréninku</button>
+          </div>
+        </div>
+        <div id="dayExerciseList" class="exercise-list" style="margin-top:14px">
+          ${items.map(item => renderDayExerciseCard(dayObj.key, item)).join('') || `<div class="empty">Dneska volno? Přidej si cviky přes vyhledávač výše. 🦾</div>`}
+        </div>
+        <div class="save-wrap">
+          <div class="card">
+            <div class="row" style="justify-content:space-between; gap:12px;">
+              <div><strong>Máš hotovo?</strong><div class="tiny">Zápis do trvalé historie provedete jedním kliknutím.</div></div>
+              <button id="saveWorkoutBtn" class="primary">Uložit celý dnešní trénink</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDatabasePanel() {
+      return `
+        <div class="form-grid">
+          <div class="field"><label>Název nového cviku</label><input id="exerciseNameInput" placeholder="Např. Incline Dumbbell Press" /></div>
+          <div class="field"><label>Partie / Svalová skupina</label><input id="exercisePartInput" placeholder="Např. Hrudník" /></div>
+          <div class="field">
+            <label>Primární cíl sledování</label>
+            <select id="exerciseTrackModeInput">
+              <option value="both" selected>Váha i opakování (Klasický progres)</option>
+              <option value="weight">Pouze váha</option>
+              <option value="reps">Pouze opakování</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Typ odporu</label>
+            <select id="exerciseValueModeInput">
+              <option value="weight" selected>Standardní závaží (kg)</option>
+              <option value="bw">Vlastní váha těla (BW)</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px"><button id="addExerciseBtn" class="primary">Zapsat nový cvik do DB</button></div>
+        <div class="hr"></div>
+        <div class="form-grid">
+          <div class="field"><label>Filtr partie</label><select id="dbPartFilter">${renderPartOptions(state.ui.dbPartFilter)}</select></div>
+          <div class="field"><label>Rychlé hledání</label><input id="exerciseSearchInput" placeholder="Napiš název..." value="${escapeHtml(state.ui.dbSearch || '')}" /></div>
+        </div>
+        <div id="exerciseDbList" class="exercise-list" style="margin-top:12px"></div>
+      `;
+    }
+
+    function renderDbItem(ex) {
+      const { best } = bestWorstRecords(ex);
+      return `
+        <div class="db-item">
+          <div class="db-item-head">
+            <div>
+              <div><strong>${escapeHtml(ex.name)}</strong></div>
+              <div class="db-meta">${escapeHtml(ex.part || 'Bez zařazení')} · ${ex.history.length} sérií v historii</div>
+              ${best ? `<div class="tiny">Osobní maximum: ${formatRecord(ex, best)}</div>` : `<div class="tiny">Zatím neodtrénováno</div>`}
+            </div>
+            <div class="db-item-controls">
+              <button data-del-ex="${ex.id}" class="danger">Odstranit kompletně</button>
+            </div>
+          </div>
+          <details class="db-details">
+            <summary><span class="arrow">▶</span> Zobrazit celou historii sérií</summary>
+            <div class="full-history">
+              ${[...ex.history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(h => `
+                <div class="history-line">${new Date(h.date).toLocaleDateString('cs-CZ')} - Série ${h.setIndex}: ${formatRecord(ex, h)}</div>
+              `).join('') || '<div class="muted">Žádné záznamy</div>'}
+            </div>
+          </details>
+        </div>
+      `;
+    }
+
+    function bindDatabasePanel() {
+      const list = document.getElementById('exerciseDbList');
+      const search = document.getElementById('exerciseSearchInput');
+      const partFilter = document.getElementById('dbPartFilter');
+      const renderList = () => {
+        state.ui.dbSearch = search.value;
+        state.ui.dbPartFilter = partFilter.value;
+        saveState();
+        const q = search.value.toLowerCase();
+        const filtered = state.exercises.filter(ex => {
+          return (`${ex.name} ${ex.part}`).toLowerCase().includes(q) && (partFilter.value === 'all' || ex.part === partFilter.value);
+        });
+        list.innerHTML = filtered.map(renderDbItem).join('') || `<div class="empty">Žádný cvik neodpovídá filtru.</div>`;
+        list.querySelectorAll('[data-del-ex]').forEach(btn => btn.addEventListener('click', () => deleteExercise(btn.dataset.delEx)));
+      };
+      document.getElementById('addExerciseBtn').addEventListener('click', () => {
+        addExercise(document.getElementById('exerciseNameInput').value, document.getElementById('exercisePartInput').value, document.getElementById('exerciseTrackModeInput').value, document.getElementById('exerciseValueModeInput').value);
+        document.getElementById('exerciseNameInput').value = '';
+      });
+      search.addEventListener('input', renderList);
+      partFilter.addEventListener('change', renderList);
+      renderList();
+    }
+
+    function renderDayExerciseCard(dayKey, item) {
+      const ex = findExercise(item.exerciseId);
+      if (!ex) return '';
+      ensureDraftSlots(dayKey, ex.id, item.setCount);
+      const drafts = state.draftDays[dayKey][ex.id];
+      const isBW = ex.valueMode === 'bw';
+
+      // Absolutní PR pro zobrazení v záhlaví cviku
+      const { best } = bestWorstRecords(ex);
+      const prBadge = best ? `<span class="pr-badge">👑 PR: ${formatRecord(ex, best)}</span>` : '';
+
+      return `
+        <div class="exercise-card">
+          <div class="exercise-head">
+            <div>
+              <div class="exercise-title" style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span>${escapeHtml(ex.name)}</span>
+                ${prBadge}
+              </div>
+              <div class="mini" style="margin-top:4px;">${escapeHtml(ex.part || 'Bez partie')}</div>
+            </div>
+            <div class="row">
+              <button data-add-set="${ex.id}" class="good">+ Set</button>
+              <button data-remove-set="${ex.id}" class="warn">- Set</button>
+              <button data-removefromday="${ex.id}" class="danger">Odebrat</button>
+            </div>
+          </div>
+          <div class="sets">
+            ${Array.from({ length: item.setCount }, (_, i) => {
+              const setNo = i + 1;
+              const draft = drafts[i] || { weight: '', reps: '' };
+              const trend = calculateSetBarometer(ex, setNo, draft.weight, draft.reps);
+              return `
+                <div class="set-row ${isBW ? 'bw' : ''}" data-exercise="${ex.id}" data-set="${setNo}">
+                  <div class="set-label">Série ${setNo}</div>
+                  ${isBW ? '' : `
+                    <div class="value-control">
+                      <button type="button" class="step-btn secondary weight-minus">−</button>
+                      <input type="number" step="0.5" placeholder="kg" class="weight-input" value="${escapeHtml(draft.weight)}" />
+                      <button type="button" class="step-btn secondary weight-plus">+</button>
+                    </div>
+                  `}
+                  <div class="value-control">
+                    <button type="button" class="step-btn secondary reps-minus">−</button>
+                    <input type="number" placeholder="reps" class="reps-input" value="${escapeHtml(draft.reps)}" />
+                    <button type="button" class="step-btn secondary reps-plus">+</button>
+                  </div>
+                  
+                  ${renderSetTrendWidget(ex, setNo, draft)}
+
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAssignSelect(dayKey) {
+      const select = document.getElementById('assignExerciseSelect');
+      if (!select) return;
+      const search = (state.ui.dayExerciseSearch?.[dayKey] || '').toLowerCase();
+      const available = state.exercises.filter(ex => ex.name.toLowerCase().includes(search));
+      select.innerHTML = `<option value="">Vyber cvik...</option>` + available.map(ex => `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`).join('');
+    }
+
+    function bindDayPanel(dayKey) {
+      renderAssignSelect(dayKey);
+      document.getElementById('dayPartFilter').addEventListener('change', (e) => { state.ui.dayPartFilters[dayKey] = e.target.value; saveState(); render(); });
+      document.getElementById('assignExerciseSearch').addEventListener('input', (e) => { state.ui.dayExerciseSearch[dayKey] = e.target.value; renderAssignSelect(dayKey); });
+      document.getElementById('assignExerciseBtn').addEventListener('click', () => assignExerciseToDay(dayKey, document.getElementById('assignExerciseSelect').value));
+      document.getElementById('saveWorkoutBtn').addEventListener('click', () => saveWholeWorkout(dayKey));
+
+      const wrap = document.getElementById('dayExerciseList');
+      if (!wrap) return;
+      wrap.querySelectorAll('[data-removefromday]').forEach(btn => btn.addEventListener('click', () => unassignExerciseFromDay(dayKey, btn.dataset.removefromday)));
+      wrap.querySelectorAll('[data-add-set]').forEach(btn => btn.addEventListener('click', () => addSetToDayExercise(dayKey, btn.dataset.addSet)));
+      wrap.querySelectorAll('[data-remove-set]').forEach(btn => btn.addEventListener('click', () => removeSetFromDayExercise(dayKey, btn.dataset.removeSet)));
+
+      wrap.querySelectorAll('.set-row').forEach(row => {
+        const exerciseId = row.dataset.exercise;
+        const setIndex = Number(row.dataset.set);
+        const ex = findExercise(exerciseId);
+
+        const weightInput = row.querySelector('.weight-input');
+        const repsInput = row.querySelector('.reps-input');
+        
+        // Reaktivní aktualizace silového barometru v reálném čase
+        const updateRealTimeTrend = () => {
+          const wVal = weightInput ? weightInput.value : '';
+          const rVal = repsInput ? repsInput.value : '';
+          const trendWidget = row.querySelector(`[data-exercise-trend="${exerciseId}"][data-set-trend="${setIndex}"]`);
+          if (trendWidget) {
+            const draft = { weight: wVal, reps: rVal };
+            trendWidget.outerHTML = renderSetTrendWidget(ex, setIndex, draft);
+          }
+        };
+
+        if (weightInput) {
+          weightInput.addEventListener('input', () => { 
+            updateDraft(dayKey, exerciseId, setIndex, 'weight', weightInput.value); 
+            updateRealTimeTrend(); 
+            updateWorkoutPreview(dayKey); 
+          });
+          row.querySelector('.weight-minus').addEventListener('click', () => {
+            updateExerciseDraftValue(dayKey, exerciseId, setIndex, 'weight', -2.5);
+            updateRealTimeTrend();
+            updateWorkoutPreview(dayKey);
+          });
+          row.querySelector('.weight-plus').addEventListener('click', () => {
+            updateExerciseDraftValue(dayKey, exerciseId, setIndex, 'weight', 2.5);
+            updateRealTimeTrend();
+            updateWorkoutPreview(dayKey);
+          });
+        }
+        if (repsInput) {
+          repsInput.addEventListener('input', () => { 
+            updateDraft(dayKey, exerciseId, setIndex, 'reps', repsInput.value); 
+            updateRealTimeTrend(); 
+            updateWorkoutPreview(dayKey); 
+          });
+          row.querySelector('.reps-minus').addEventListener('click', () => {
+            updateExerciseDraftValue(dayKey, exerciseId, setIndex, 'reps', -1);
+            updateRealTimeTrend();
+            updateWorkoutPreview(dayKey);
+          });
+          row.querySelector('.reps-plus').addEventListener('click', () => {
+            updateExerciseDraftValue(dayKey, exerciseId, setIndex, 'reps', 1);
+            updateRealTimeTrend();
+            updateWorkoutPreview(dayKey);
+          });
+        }
+      });
+    }
+
+    function render() { renderTabs(); renderPanel(); }
+
+    document.getElementById('resetBtn').addEventListener('click', () => { 
+      showConfirm('Opravdu chcete vymazat celou aplikaci? Všechny tréninky a historie progresu budou navždy odstraněny.', () => { 
+        localStorage.removeItem(STORAGE_KEY); 
+        state = defaultState(); 
+        toggleDrawer();
+        showToast('Aplikace byla úspěšně resetována.', 'info');
+        render(); 
+      }, true);
+    });
+
+    document.getElementById('seedDemoBtn').addEventListener('click', () => {
+      state = defaultState();
+      const e1 = defaultExercise('Bench Press', 'Hrudník');
+      const e2 = defaultExercise('Shyby nadhmatem', 'Záda', 'reps', 'bw');
+      state.exercises.push(e1, e2);
+
+      // Přidáme nějakou simulovanou historii, aby hned barometr fungoval
+      const baseDate = new Date();
+      e1.history.push({ id: uid(), date: new Date(baseDate.getTime() - 86400000 * 7).toISOString(), dayKey: 'mon', setIndex: 1, weight: 80, reps: 8 });
+      e1.history.push({ id: uid(), date: new Date(baseDate.getTime() - 86400000 * 7).toISOString(), dayKey: 'mon', setIndex: 2, weight: 80, reps: 7 });
+      e1.history.push({ id: uid(), date: new Date(baseDate.getTime() - 86400000 * 7).toISOString(), dayKey: 'mon', setIndex: 3, weight: 75, reps: 10 });
+      
+      e2.history.push({ id: uid(), date: new Date(baseDate.getTime() - 86400000 * 7).toISOString(), dayKey: 'mon', setIndex: 1, weight: null, reps: 10 });
+      e2.history.push({ id: uid(), date: new Date(baseDate.getTime() - 86400000 * 7).toISOString(), dayKey: 'mon', setIndex: 2, weight: null, reps: 9 });
+      e2.history.push({ id: uid(), date: new Date(baseDate.getTime() - 86400000 * 7).toISOString(), dayKey: 'mon', setIndex: 3, weight: null, reps: 8 });
+
+      state.days.mon.items.push({ exerciseId: e1.id, setCount: 3 });
+      state.days.mon.items.push({ exerciseId: e2.id, setCount: 3 });
+      
+      saveState(); 
+      toggleDrawer();
+      showToast('Nahrána demo data s historií z minulého týdne.', 'success');
+      render();
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'training-log-export.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toggleDrawer();
+      showToast('Záloha dat byla stažena do vašeho zařízení.', 'success');
+    });
+
+    document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+
+    document.getElementById('importFile').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        state = migrateState(JSON.parse(await file.text()));
+        saveState();
+        toggleDrawer();
+        showToast('Všechna data byla úspěšně naimportována!', 'success');
+        render();
+      } catch (err) {
+        console.error(err);
+        showToast('Import se nezdařil. Soubor pravděpodobně nemá správnou strukturu.', 'error');
+      } finally {
+        e.target.value = '';
+      }
+    });
+
+    render();
+  </script>
 </body>
 </html>
