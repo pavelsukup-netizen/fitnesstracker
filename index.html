@@ -2,469 +2,168 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trénink log v6.4</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Trénink log v7</title>
   <style>
     :root{
-      --bg:#0f1115;
-      --panel:#171a21;
-      --panel-2:#1f2430;
-      --line:#2d3443;
-      --text:#eef2f7;
-      --muted:#a9b3c3;
+      --bg:#0e1117;
+      --panel:#171b24;
+      --panel2:#202636;
+      --panel3:#10151f;
+      --line:#30384a;
+      --text:#eef3fb;
+      --muted:#a8b3c6;
       --accent:#5aa2ff;
-      --accent-2:#77e0b5;
-      --danger:#ff6b6b;
+      --good:#65d983;
       --warn:#ffcf5a;
-      --good:#63d471;
+      --danger:#ff6b6b;
+      --violet:#b98cff;
       --radius:18px;
-      --shadow:0 10px 30px rgba(0,0,0,.28);
+      --shadow:0 18px 42px rgba(0,0,0,.32);
     }
     *{box-sizing:border-box}
+    html,body{min-height:100%;}
     body{
       margin:0;
       font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
-      background:linear-gradient(180deg,#0d1016,#141925 40%,#0f1115);
+      background:radial-gradient(circle at top left,rgba(90,162,255,.16),transparent 32%),linear-gradient(180deg,#0c1017,#141a26 45%,#0e1117);
       color:var(--text);
-      overflow-x: hidden;
+      overflow-x:hidden;
     }
-    .wrap{max-width:1280px;margin:0 auto;padding:16px}
-    
-    .topbar{
-      display:flex;
-      gap:16px;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:16px;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-      padding-bottom: 12px;
-    }
-    h1{margin:0;font-size:24px;font-weight: 800; background: linear-gradient(90deg, #fff, var(--muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
-    .sub{color:var(--muted);font-size:13px;margin-top:2px}
-    
-    .menu-trigger{
-      background: var(--panel-2);
-      border: 1px solid var(--line);
-      color: var(--text);
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .menu-trigger:hover{
-      background: #283041;
-      border-color: #41506b;
-    }
-
-    .drawer-overlay{
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.25s ease, visibility 0.25s ease;
-    }
-    .drawer-overlay.open{
-      opacity: 1;
-      visibility: visible;
-    }
-    .drawer{
-      position: fixed;
-      top: 0;
-      right: -300px;
-      width: 300px;
-      height: 100%;
-      background: var(--panel);
-      border-left: 1px solid var(--line);
-      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-      z-index: 1001;
-      display: flex;
-      flex-direction: column;
-      transition: right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .drawer.open{
-      right: 0;
-    }
-    .drawer-head{
-      padding: 20px;
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .drawer-head h3{
-      margin: 0;
-      font-size: 18px;
-      font-weight: 800;
-    }
-    .drawer-close{
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      font-size: 24px;
-      cursor: pointer;
-      padding: 4px;
-    }
-    .drawer-close:hover{
-      color: var(--text);
-    }
-    .drawer-body{
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      flex-grow: 1;
-    }
-    .drawer-body button{
-      width: 100%;
-      padding: 12px;
-      text-align: left;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .drawer-footer{
-      padding: 20px;
-      border-top: 1px solid var(--line);
-      font-size: 11px;
-      color: var(--muted);
-      text-align: center;
-    }
-
     button,input,select{font:inherit;border:none;outline:none}
-    button{background:var(--panel-2);color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;border:1px solid var(--line);transition:.18s transform,.18s background,.18s border-color}
-    button:hover{transform:translateY(-1px);background:#283041;border-color:#41506b}
-    button.primary{background:var(--accent);color:#09111f;border-color:transparent;font-weight:800}
-    button.good{background:rgba(99,212,113,.14);border-color:rgba(99,212,113,.28);color:#d8ffe0}
-    button.warn{background:rgba(255,207,90,.12);border-color:rgba(255,207,90,.25);color:#fff0b3}
-    button.danger{background:rgba(255,107,107,.12);border-color:rgba(255,107,107,.25);color:#ffdada}
-    button.secondary{background:#11161f}
-    .icon-btn{padding:9px 11px;min-width:44px;text-align:center}
-    .card{background:rgba(23,26,33,.92);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
-    .card h2{margin:0;font-size:18px}
-    .card-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
-    .card-body{padding:16px 18px}
-    .field{display:flex;flex-direction:column;gap:7px}
-    label{font-size:13px;color:var(--muted)}
-    input,select{background:#0f141d;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .day-tabs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-bottom:10px}
-    .db-tab-wrap{margin-bottom:16px}
-    .db-tab-wrap .tab-btn{width:100%}
-    .tab-btn{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:left;min-height:76px;cursor:pointer}
-    .tab-btn.active{background:linear-gradient(180deg,#1e2633,#18202c);border-color:#4c6b93}
-    .tab-name{font-weight:800}
-    .tab-name-short{display:none}
-    .tab-meta{font-size:12px;color:var(--muted);margin-top:6px}
-    .exercise-list{display:flex;flex-direction:column;gap:14px}
-    
-    .exercise-card{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#151a23,#11161e);overflow:hidden}
-    .exercise-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
-    .exercise-title{font-size:18px;font-weight:800}
-    .badge{padding:6px 10px;border-radius:999px;font-size:12px;background:#212938;color:var(--muted);border:1px solid var(--line)}
-    
-    /* Zlatý PR odznak */
-    .pr-badge {
-      background: rgba(255, 207, 90, 0.08);
-      border: 1px solid rgba(255, 207, 90, 0.25);
-      color: var(--warn);
-      font-weight: 700;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
+    button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:13px;padding:10px 13px;cursor:pointer;transition:.16s transform,.16s background,.16s border-color}
+    button:hover{transform:translateY(-1px);background:#293247;border-color:#465673}
+    button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+    button.primary{background:var(--accent);border-color:transparent;color:#08101e;font-weight:850}
+    button.good{background:rgba(101,217,131,.13);border-color:rgba(101,217,131,.33);color:#d9ffe2}
+    button.warn{background:rgba(255,207,90,.12);border-color:rgba(255,207,90,.28);color:#fff0b3}
+    button.danger{background:rgba(255,107,107,.12);border-color:rgba(255,107,107,.28);color:#ffdada}
+    button.ghost{background:#10151f}
+    input,select{background:#0f141e;color:var(--text);border:1px solid var(--line);border-radius:13px;padding:11px 12px;min-width:0;width:100%}
+    label{font-size:12px;color:var(--muted);display:block;margin:0 0 7px 0}
+    .wrap{max-width:1120px;margin:0 auto;padding:14px 14px 28px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    h1{font-size:23px;line-height:1.05;margin:0;font-weight:900;letter-spacing:-.02em;background:linear-gradient(90deg,#fff,#b8c6dc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sub{font-size:12px;color:var(--muted);margin-top:4px}
+    .menu-btn{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;flex:0 0 auto}
+    .screen{display:none}
+    .screen.active{display:block}
+    .card{background:rgba(23,27,36,.93);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .card + .card{margin-top:12px}
+    .card-head{padding:15px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .card-body{padding:15px 16px}
+    h2{font-size:18px;margin:0;font-weight:900;letter-spacing:-.01em}
+    h3{font-size:16px;margin:0;font-weight:850}
+    .row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+    .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+    .tiny{font-size:11px;color:var(--muted);line-height:1.35}
     .muted{color:var(--muted)}
-    .sets{padding:16px;display:grid;gap:12px}
-    .set-row{display:grid;grid-template-columns:86px 1fr 1fr 220px;gap:12px;align-items:center}
-    .set-row.bw{grid-template-columns:86px 1fr 220px}
-    .set-label{font-weight:700;color:var(--muted)}
-    .value-control{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;gap:6px;align-items:center}
-    .value-control input{padding:10px 8px;text-align:center;min-width:0}
-    .step-btn{padding:9px 0;min-width:40px;font-weight:800}
+    .hr{height:1px;background:var(--line);margin:14px 0}
+    .pill,.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:#222a3a;border:1px solid var(--line);color:var(--muted);font-size:12px;white-space:nowrap}
+    .pill.good{color:#d9ffe2;border-color:rgba(101,217,131,.3);background:rgba(101,217,131,.09)}
+    .pill.warn{color:#fff0b3;border-color:rgba(255,207,90,.3);background:rgba(255,207,90,.09)}
+    .pill.blue{color:#dceaff;border-color:rgba(90,162,255,.3);background:rgba(90,162,255,.10)}
+    .day-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:0 0 12px}
+    .day-btn{min-height:58px;padding:7px 4px;text-align:center;border-radius:12px;background:var(--panel)}
+    .day-btn.active{border-color:#5f83b8;background:linear-gradient(180deg,#1f2b3d,#17202d)}
+    .day-short{font-size:13px;font-weight:900;text-transform:uppercase}
+    .day-count{font-size:10px;color:var(--muted);margin-top:3px}
+    .metric-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0}
+    .metric{background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:15px;padding:11px 10px;min-width:0}
+    .metric .t{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+    .metric .v{font-size:17px;font-weight:900;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .metric .s{font-size:10px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .plan-list,.log-list,.db-list{display:flex;flex-direction:column;gap:10px}
+    .plan-item,.log-item,.db-item{border:1px solid var(--line);background:linear-gradient(180deg,#151b25,#10151d);border-radius:16px;padding:12px}
+    .plan-top,.db-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+    .plan-title,.db-title{font-size:16px;font-weight:900}
+    .plan-controls{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+    .icon-btn{min-width:36px;height:36px;padding:0;display:grid;place-items:center;border-radius:10px;font-weight:900}
+    .picker{border:1px solid var(--line);background:rgba(0,0,0,.16);border-radius:16px;padding:12px;margin-top:12px}
+    .picker-actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+    .sticky-start{position:sticky;bottom:0;padding:12px 0 0;background:linear-gradient(180deg,rgba(14,17,23,0),rgba(14,17,23,.96) 35%,rgba(14,17,23,1));z-index:5}
+    .start-btn{width:100%;min-height:52px;font-size:16px;border-radius:16px}
+    .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.68);backdrop-filter:blur(5px);z-index:100;opacity:0;visibility:hidden;transition:.2s}
+    .drawer-overlay.open{opacity:1;visibility:visible}
+    .drawer{position:fixed;top:0;right:-322px;width:322px;max-width:88vw;height:100%;background:var(--panel);border-left:1px solid var(--line);box-shadow:-16px 0 45px rgba(0,0,0,.48);z-index:101;transition:right .24s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column}
+    .drawer.open{right:0}
+    .drawer-head{padding:18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+    .drawer-body{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1}
+    .drawer-body button{text-align:left;width:100%}
+    .drawer-foot{padding:16px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);text-align:center}
+    .toast-wrap{position:fixed;left:12px;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px;z-index:200;pointer-events:none}
+    .toast{padding:12px 14px;border-radius:14px;background:#202738;border:1px solid var(--line);box-shadow:var(--shadow);font-size:13px;font-weight:700;animation:toastIn .22s ease forwards}
+    .toast.good{border-color:rgba(101,217,131,.35);background:rgba(30,72,45,.96)}
+    .toast.warn{border-color:rgba(255,207,90,.35);background:rgba(70,55,20,.96)}
+    .toast.danger{border-color:rgba(255,107,107,.35);background:rgba(75,25,30,.96)}
+    @keyframes toastIn{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
 
-    /* Pokročilý trend widget se silovým barometrem */
-    .trend-widget {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      padding: 8px 12px;
-      border-radius: 12px;
-      background: #0f141d;
-      border: 1px solid var(--line);
-      font-size: 11px;
-      min-height: 52px;
-      width: 100%;
-      justify-content: center;
-      transition: all 0.2s ease;
-    }
-    .trend-widget.up {
-      border-color: rgba(99,212,113,.25);
-      background: rgba(99,212,113,.03);
-    }
-    .trend-widget.down {
-      border-color: rgba(255,107,107,.25);
-      background: rgba(255,107,107,.03);
-    }
-    .trend-widget.same {
-      border-color: rgba(255,207,90,.25);
-      background: rgba(255,207,90,.03);
-    }
-    .trend-widget.mix {
-      border-color: rgba(90,162,255,.25);
-      background: rgba(90,162,255,.03);
-    }
-    .trend-widget-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 700;
-    }
-    .trend-pct {
-      font-size: 11px;
-      font-weight: 800;
-      padding: 1px 5px;
-      border-radius: 4px;
-    }
-    .trend-pct.up { color: #b9ffbe; background: rgba(99,212,113,.12); }
-    .trend-pct.down { color: #ffd1d1; background: rgba(255,107,107,.12); }
-    .trend-pct.same { color: #fff1c0; background: rgba(255,207,90,.12); }
-    .trend-pct.mix { color: #dce9ff; background: rgba(90,162,255,.12); }
-    
-    .trend-subtext {
-      color: var(--muted);
-      font-size: 10px;
-    }
-    .trend-bar-track {
-      height: 4px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 999px;
-      overflow: hidden;
-      width: 100%;
-      position: relative;
-    }
-    /* Značka 100% (minulého tréninku) */
-    .trend-bar-track::after {
-      content: '';
-      position: absolute;
-      left: 75%;
-      top: 0;
-      width: 2px;
-      height: 100%;
-      background: rgba(255,255,255,0.35);
-      z-index: 2;
-    }
-    .trend-bar {
-      height: 100%;
-      border-radius: 999px;
-      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .trend-widget-footer {
-      display: flex;
-      justify-content: space-between;
-      color: var(--muted);
-      font-size: 9px;
-    }
-    .trend-pr-tag {
-      color: var(--warn);
-      font-weight: 600;
-    }
+    /* Session */
+    .session-top{position:sticky;top:0;z-index:8;background:linear-gradient(180deg,rgba(14,17,23,1),rgba(14,17,23,.94));padding-bottom:10px;margin-bottom:10px}
+    .session-bar{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+    .timer{font-variant-numeric:tabular-nums;font-size:28px;font-weight:950;letter-spacing:-.03em}
+    .exercise-hero{border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,#182033,#101720);padding:15px;box-shadow:var(--shadow)}
+    .exercise-index{font-size:12px;color:var(--muted);margin-bottom:4px}
+    .exercise-name{font-size:23px;font-weight:950;line-height:1.05;letter-spacing:-.03em}
+    .pr-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:13px}
+    .pr-card{background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:13px;padding:9px 8px;min-width:0}
+    .pr-card .t{font-size:10px;color:var(--muted);text-transform:uppercase}
+    .pr-card .v{font-size:13px;font-weight:900;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .set-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+    .set-card{border:1px solid var(--line);border-radius:17px;background:linear-gradient(180deg,#151b25,#10151f);padding:11px}
+    .set-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+    .set-title strong{font-size:14px}
+    .set-inputs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .set-inputs.bw{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .num-control{display:grid;grid-template-columns:32px 1fr 32px;gap:4px;align-items:center}
+    .num-control input{text-align:center;padding:8px 4px;height:38px;font-size:14px}
+    .num-control button{height:38px;min-width:32px;padding:0;font-weight:900;border-radius:10px}
+    .input-label{font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+    .bw-box{height:38px;border:1px solid var(--line);border-radius:12px;background:#0f141e;display:grid;place-items:center;font-weight:900;color:#dceaff}
+    .trend-stack{margin-top:10px;display:grid;gap:6px}
+    .trend-line{display:grid;grid-template-columns:52px 1fr 54px;gap:8px;align-items:center;font-size:11px;color:var(--muted)}
+    .trend-line .name{font-weight:800;color:#dce3ef}
+    .bar-track{height:7px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden;position:relative}
+    .bar-track:after{content:'';position:absolute;left:75%;top:0;width:2px;height:100%;background:rgba(255,255,255,.36)}
+    .bar{height:100%;border-radius:999px;width:75%;background:var(--warn);transition:.18s}
+    .delta{text-align:right;font-variant-numeric:tabular-nums;font-weight:900}
+    .delta.up{color:#baffc8}.delta.down{color:#ffd1d1}.delta.same{color:#ffe9a2}.delta.mix{color:#cfe2ff}
+    .session-nav{position:sticky;bottom:0;z-index:8;padding:12px 0 0;background:linear-gradient(180deg,rgba(14,17,23,0),rgba(14,17,23,.96) 35%,#0e1117)}
+    .session-nav-inner{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .session-nav-inner.single{grid-template-columns:1fr}
+    .big-nav{min-height:54px;font-size:16px;border-radius:16px;font-weight:900}
+    .progress-dots{display:flex;gap:5px;justify-content:center;margin:10px 0 0}
+    .dot{width:8px;height:8px;border-radius:999px;background:#384254}.dot.active{background:var(--accent)}.dot.done{background:var(--good)}
 
-    /* Oddělené metriky pro váhu a opakování */
-    .trend-metrics{
-      display:grid;
-      gap:7px;
-    }
-    .trend-metric-row{
-      display:grid;
-      grid-template-columns:52px 1fr auto;
-      gap:8px;
-      align-items:center;
-    }
-    .trend-metric-label{
-      color:var(--muted);
-      font-size:10px;
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-    }
-    .metric-bar-track{
-      height:6px;
-      background:rgba(255,255,255,0.06);
-      border-radius:999px;
-      overflow:hidden;
-      position:relative;
-    }
-    .metric-bar-track::after{
-      content:'';
-      position:absolute;
-      left:75%;
-      top:0;
-      width:2px;
-      height:100%;
-      background:rgba(255,255,255,0.28);
-      z-index:2;
-    }
-    .metric-bar-fill{
-      height:100%;
-      border-radius:999px;
-      transition:width .25s ease;
-    }
-    .trend-metric-value{
-      min-width:58px;
-      text-align:right;
-      font-size:10px;
-      font-weight:800;
-    }
-    .trend-metric-value.up{color:#b9ffbe}
-    .trend-metric-value.down{color:#ffd1d1}
-    .trend-metric-value.same{color:#fff1c0}
-    .trend-metric-value.mix{color:#dce9ff}
-    .trend-widget-note{
-      color:var(--muted);
-      font-size:9px;
-      display:flex;
-      justify-content:space-between;
-      gap:8px;
-      flex-wrap:wrap;
-    }
+    /* Log */
+    .log-headline{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+    .log-title{font-size:16px;font-weight:900}
+    .log-meta{font-size:12px;color:var(--muted);margin-top:2px}
+    .log-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:10px 0}
+    .log-metric{background:rgba(0,0,0,.16);border:1px solid var(--line);border-radius:12px;padding:8px}
+    .log-metric .t{font-size:9px;color:var(--muted);text-transform:uppercase}.log-metric .v{font-size:13px;font-weight:900;margin-top:2px}
+    details{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+    summary{cursor:pointer;color:#dbe7f7;font-weight:800;font-size:13px}
+    .table-wrap{overflow:auto;margin-top:10px}
+    table{width:100%;border-collapse:collapse;font-size:12px;min-width:650px}
+    th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;white-space:nowrap}th{color:var(--muted);font-size:10px;text-transform:uppercase}
 
-
-    @keyframes slideIn {
-      from { transform: translateY(100px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    @keyframes slideOut {
-      from { transform: translateY(0); opacity: 1; }
-      to { transform: translateY(100px); opacity: 0; }
-    }
-
-    /* Čistý potvrzovací modal */
-    .confirm-modal-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(4px);
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-    .confirm-modal-box {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 24px;
-      max-width: 420px;
-      width: 100%;
-      box-shadow: var(--shadow);
-      animation: modalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    @keyframes modalIn {
-      from { transform: scale(0.95); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    
-    @media (max-width: 1100px){
-      .day-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
-    }
-    @media (max-width: 820px){
-      .day-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
-      .form-grid,.history-grid,.workout-summary,.picker-grid{grid-template-columns:1fr}
-      .set-row{grid-template-columns:1fr 1fr}
-      .set-row.bw{grid-template-columns:1fr 1fr}
-      .set-label{grid-column:1/-1}
-      .trend-widget{grid-column:1/-1}
-    }
-
-    @media (max-width: 620px){
-      .wrap{padding:10px}
-      h1{font-size:20px}
-      .sub{font-size:12px}
-
-      .topbar{gap:10px;margin-bottom:12px;padding-bottom:10px}
-
-      .day-tabs{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
-      .tab-btn{min-height:54px;padding:6px 2px;text-align:center;border-radius:10px}
-      .tab-name-full{display:none}
-      .tab-name-short{display:block;font-size:13px}
-      .tab-meta{font-size:9px;margin-top:2px}
-
-      .workout-summary{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:6px;margin:12px 0}
-      .metric-card{padding:8px 4px;text-align:center}
-      .metric-title{font-size:9px;letter-spacing:0}
-      .metric-value{font-size:14px;font-weight:800;margin-top:2px}
-      .metric-sub{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-      .picker-grid{grid-template-columns:1fr 1fr;gap:8px}
-      .picker-actions{margin-top:8px;gap:6px}
-      .picker-actions select{padding:8px 10px;font-size:13px}
-      .picker-actions button{padding:8px 12px;font-size:13px}
-
-      .card-head, .card-body{padding:12px}
-      .exercise-head{padding:10px 12px;flex-direction:column;align-items:flex-start;gap:8px}
-      .exercise-title{font-size:16px}
-      .exercise-head .row{width:100%;justify-content:space-between;gap:4px;flex-wrap:wrap}
-      .exercise-head button{flex:1 1 auto;padding:6px 8px;font-size:11px;min-width:auto;height:32px}
-      .exercise-head .badge, .exercise-head .pr-badge{padding:4px 8px;font-size:11px}
-
-      .sets{padding:10px;gap:8px}
-      .set-row{
-        grid-template-columns:40px 1fr 1fr !important;
-        grid-template-rows:auto auto;
-        gap:6px 4px !important;
-        align-items:center;
-      }
-      .set-row.bw{
-        grid-template-columns:40px 1fr !important;
-        grid-template-rows:auto auto;
-      }
-      .set-label{grid-row:1;grid-column:1;font-size:12px}
-      
-      .value-control{
-        grid-row:1;
-        grid-template-columns:28px minmax(0,1fr) 28px !important;
-        gap:2px;
-      }
-      .value-control input{padding:6px 2px;font-size:14px;height:32px}
-      .step-btn{min-width:28px;height:32px;padding:0;font-size:14px}
-
-      .trend-widget{
-        grid-row:2;
-        grid-column:1 / -1;
-        min-height:auto;
-        padding:8px 10px;
-        font-size:11px;
-        justify-content:flex-start;
-        border-radius:10px;
-        margin-top:4px;
-      }
-
-      .form-grid{grid-template-columns:1fr;gap:8px}
-      .db-item{padding:10px;gap:8px;flex-direction:column;align-items:stretch}
-      .db-item-head{width:100%}
-      .db-item-controls{width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:4px}
-      .db-item-controls button{grid-column:1 / -1}
-      
-      #toastContainer {
-        bottom: 12px;
-        right: 12px;
-        left: 12px;
-      }
+    @media(max-width:720px){
+      .wrap{padding:10px 10px 24px}
+      h1{font-size:20px}.sub{font-size:11px}
+      .grid,.grid3{grid-template-columns:1fr}
+      .metric-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+      .metric{padding:9px 6px;text-align:center}.metric .t{font-size:9px}.metric .v{font-size:14px}.metric .s{font-size:9px}
+      .card-head,.card-body{padding:12px}
+      .day-grid{gap:4px}.day-btn{min-height:50px;border-radius:10px;padding:5px 2px}.day-short{font-size:12px}.day-count{font-size:9px}
+      .picker-actions{grid-template-columns:1fr}.plan-top{flex-direction:column}.plan-controls{width:100%;justify-content:space-between}.plan-controls button{flex:1}
+      .timer{font-size:24px}.exercise-name{font-size:21px}.exercise-hero{padding:13px}
+      .pr-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.pr-card{padding:8px 6px}.pr-card .v{font-size:12px}
+      .set-inputs{grid-template-columns:1fr 1fr}.set-inputs.bw{grid-template-columns:1fr}
+      .set-inputs .rpe-field{grid-column:1/-1}
+      .log-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .drawer{width:300px}
     }
   </style>
 </head>
@@ -473,1087 +172,590 @@
     <div class="topbar">
       <div>
         <h1>Trénink log</h1>
-        <div class="sub">Vyladěná mobilní verze se silovým barometrem pro rychlý zápis.</div>
+        <div class="sub">v7 · preset → start → jeden cvik na obrazovce → log + CSV export</div>
       </div>
-      <button class="menu-trigger" id="openDrawerBtn" title="Nastavení a správa">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-      </button>
+      <button class="menu-btn" id="menuBtn" title="Menu">☰</button>
     </div>
 
-    <!-- Boční vysunovací panel (Drawer) -->
-    <div class="drawer-overlay" id="drawerOverlay"></div>
-    <div class="drawer" id="drawer">
-      <div class="drawer-head">
-        <h3>Systém a data</h3>
-        <button class="drawer-close" id="closeDrawerBtn">&times;</button>
-      </div>
-      <div class="drawer-body">
-        <button id="seedDemoBtn" class="warn">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; margin-right:8px;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          Nahrát demo data
-        </button>
-        <button id="exportBtn">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; margin-right:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-          Export JSON
-        </button>
-        <button id="importBtn">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; margin-right:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          Import JSON
-        </button>
-        <input id="importFile" type="file" accept="application/json" style="display:none" />
-        <button id="resetBtn" class="danger">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; margin-right:8px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-          Resetovat celou aplikaci
-        </button>
-      </div>
-      <div class="drawer-footer">
-        Trénink log v6.4 · Sanny Studio<br>
-        Lokální data v prohlížeči.
-      </div>
-    </div>
-
-    <div class="tabs" id="mainTabs"></div>
-
-    <section class="card">
-      <div class="card-head">
-        <h2 id="panelTitle">Pondělí</h2>
-        <div class="row" id="panelActions"></div>
-      </div>
-      <div class="card-body" id="panelBody"></div>
-    </section>
+    <main id="app"></main>
   </div>
 
-  <!-- Kontejnery pro toasty a custom konfirmační okna -->
-  <div id="toastContainer"></div>
-
-  <div id="confirmModal" class="confirm-modal-overlay" style="display:none;">
-    <div class="confirm-modal-box">
-      <h3 id="confirmTitle" style="margin:0 0 12px 0; font-size:18px; font-weight:800;">Potvrdit akci</h3>
-      <p id="confirmMessage" style="margin:0 0 24px 0; font-size:14px; color:var(--muted); line-height:1.5;"></p>
-      <div style="display:flex; justify-content:flex-end; gap:10px;">
-        <button id="confirmCancelBtn" class="secondary" style="padding:10px 16px;">Zrušit</button>
-        <button id="confirmOkBtn" class="primary" style="padding:10px 16px; background:var(--danger); color:var(--text);">Provést</button>
-      </div>
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-head"><h3>Menu</h3><button id="closeDrawer" class="icon-btn ghost">×</button></div>
+    <div class="drawer-body">
+      <button data-nav="setup">🏋️ Sestavit trénink</button>
+      <button data-nav="logs">📜 Log tréninků</button>
+      <button data-nav="db">🧱 Databáze cviků</button>
+      <button id="exportJsonBtn">⬇️ Export JSON záloha</button>
+      <button id="importJsonBtn">⬆️ Import JSON záloha</button>
+      <input id="importFile" type="file" accept="application/json" style="display:none" />
+      <button id="seedDbBtn" class="warn">✨ Nahrát základní home gym DB</button>
+      <button id="resetBtn" class="danger">🗑️ Reset celé aplikace</button>
     </div>
-  </div>
+    <div class="drawer-foot">Data jsou uložená lokálně v prohlížeči.<br>Občas exportuj JSON, ať nám je nesežere gremlin.</div>
+  </aside>
+  <div class="toast-wrap" id="toastWrap"></div>
 
-  <script>
-    const STORAGE_KEY = 'trainingLogApp_v6_active';
-    const LEGACY_KEYS = ['trainingLogApp_v6', 'trainingLogApp_v5','trainingLogApp_v4','trainingLogApp_v3'];
-    const DAYS = [
-      { key: 'mon', label: 'Pondělí', short: 'po' },
-      { key: 'tue', label: 'Úterý', short: 'út' },
-      { key: 'wed', label: 'Středa', short: 'st' },
-      { key: 'thu', label: 'Čtvrtek', short: 'čt' },
-      { key: 'fri', label: 'Pátek', short: 'pá' },
-      { key: 'sat', label: 'Sobota', short: 'so' },
-      { key: 'sun', label: 'Neděle', short: 'ne' },
-    ];
-    const DATABASE_TAB = 'db';
+<script>
+const STORAGE_KEY = 'trainingLogApp_v7_sessionFlow';
+const LEGACY_KEYS = ['trainingLogApp_v6_active','trainingLogApp_v6','trainingLogApp_v5','trainingLogApp_v4','trainingLogApp_v3'];
+const DAYS = [
+  {key:'mon',label:'Pondělí',short:'po'},
+  {key:'tue',label:'Úterý',short:'út'},
+  {key:'wed',label:'Středa',short:'st'},
+  {key:'thu',label:'Čtvrtek',short:'čt'},
+  {key:'fri',label:'Pátek',short:'pá'},
+  {key:'sat',label:'Sobota',short:'so'},
+  {key:'sun',label:'Neděle',short:'ne'},
+];
+const DAY_NAMES = Object.fromEntries(DAYS.map(d=>[d.key,d.label]));
+const DAY_SHORT = Object.fromEntries(DAYS.map(d=>[d.key,d.short]));
 
-    let state = loadState();
-    let activeTab = DAYS[0].key;
+let state = loadState();
+let view = state.activeSession ? 'session' : 'setup';
+let selectedDay = state.ui?.selectedDay || dayKeyToday();
+let timerInterval = null;
 
-    // Kód pro ovládání vysunovacího bočního menu
-    const drawer = document.getElementById('drawer');
-    const drawerOverlay = document.getElementById('drawerOverlay');
-    const openDrawerBtn = document.getElementById('openDrawerBtn');
-    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
-
-    function toggleDrawer() {
-      drawer.classList.toggle('open');
-      drawerOverlay.classList.toggle('open');
-    }
-
-    openDrawerBtn.addEventListener('click', toggleDrawer);
-    closeDrawerBtn.addEventListener('click', toggleDrawer);
-    drawerOverlay.addEventListener('click', toggleDrawer);
-
-    function uid() {
-      return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
-    }
-
-    // Toast systém
-    function showToast(msg, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      if (!container) return;
-      const toast = document.createElement('div');
-      toast.style.cssText = `
-        padding: 12px 18px;
-        border-radius: 12px;
-        background: var(--panel-2);
-        border: 1px solid var(--line);
-        color: var(--text);
-        box-shadow: var(--shadow);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        font-size: 13px;
-        font-weight: 600;
-        pointer-events: auto;
-      `;
-      if (type === 'error') {
-        toast.style.borderColor = 'var(--danger)';
-        toast.style.background = 'rgba(255,107,107,0.08)';
-      } else if (type === 'success') {
-        toast.style.borderColor = 'var(--good)';
-        toast.style.background = 'rgba(99,212,113,0.08)';
-      } else if (type === 'warn') {
-        toast.style.borderColor = 'var(--warn)';
-        toast.style.background = 'rgba(255,207,90,0.08)';
-      }
-      toast.innerHTML = msg;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards';
-        setTimeout(() => toast.remove(), 300);
-      }, 3500);
-    }
-
-    // Confirm dialog systém
-    let confirmCallback = null;
-    function showConfirm(msg, callback, isDanger = false) {
-      confirmCallback = callback;
-      document.getElementById('confirmMessage').textContent = msg;
-      const okBtn = document.getElementById('confirmOkBtn');
-      if (isDanger) {
-        okBtn.style.background = 'var(--danger)';
-        okBtn.textContent = 'Smazat/Resetovat';
-      } else {
-        okBtn.style.background = 'var(--accent)';
-        okBtn.textContent = 'Potvrdit';
-      }
-      document.getElementById('confirmModal').style.display = 'flex';
-    }
-
-    document.getElementById('confirmCancelBtn').addEventListener('click', () => {
-      document.getElementById('confirmModal').style.display = 'none';
-      confirmCallback = null;
-    });
-    document.getElementById('confirmOkBtn').addEventListener('click', () => {
-      document.getElementById('confirmModal').style.display = 'none';
-      if (confirmCallback) confirmCallback();
-      confirmCallback = null;
-    });
-
-    function defaultExercise(name, part='', trackMode='both', valueMode='weight') {
-      return {
-        id: uid(),
-        name: name.trim(),
-        part: part.trim(),
-        trackMode,
-        valueMode,
-        history: []
-      };
-    }
-
-    function defaultState() {
-      return {
-        schemaVersion: 6,
-        exercises: [],
-        ui: {
-          dbPartFilter: 'all',
-          dbSearch: '',
-          dayPartFilters: Object.fromEntries(DAYS.map(d => [d.key, 'all'])),
-          dayExerciseSearch: Object.fromEntries(DAYS.map(d => [d.key, '']))
-        },
-        draftDays: Object.fromEntries(DAYS.map(d => [d.key, {}])),
-        workouts: [],
-        days: Object.fromEntries(DAYS.map(d => [d.key, { items: [] }]))
-      };
-    }
-
-    function migrateState(parsed) {
-      const base = defaultState();
-      base.exercises = Array.isArray(parsed.exercises) ? parsed.exercises.map(ex => ({
-        id: ex.id || uid(),
-        name: ex.name || 'Bez názvu',
-        part: (ex.part || ex.category || '').trim(),
-        trackMode: ex.trackMode || 'both',
-        valueMode: ex.valueMode || 'weight',
-        history: Array.isArray(ex.history) ? ex.history.map(h => ({
-          id: h.id || uid(),
-          date: h.date || new Date().toISOString(),
-          dayKey: h.dayKey || 'mon',
-          setIndex: Math.max(1, Number(h.setIndex) || 1),
-          weight: h.weight === 'BW' ? null : (h.weight ?? null),
-          reps: Number(h.reps) || 0
-        })) : []
-      })) : [];
-
-      for (const d of DAYS) {
-        const bucket = parsed.days?.[d.key];
-        if (bucket?.items && Array.isArray(bucket.items)) {
-          base.days[d.key].items = bucket.items.map(item => ({
-            exerciseId: item.exerciseId,
-            setCount: Math.max(1, Number(item.setCount || 1))
-          }));
-        }
-      }
-
-      if (parsed.draftDays && typeof parsed.draftDays === 'object') {
-        for (const d of DAYS) {
-          const src = parsed.draftDays[d.key] || {};
-          base.draftDays[d.key] = {};
-          for (const [exerciseId, sets] of Object.entries(src)) {
-            base.draftDays[d.key][exerciseId] = Array.isArray(sets) ? sets.map(s => ({
-              weight: s?.weight ?? '',
-              reps: s?.reps ?? ''
-            })) : [];
-          }
-        }
-      }
-
-      base.workouts = Array.isArray(parsed.workouts) ? parsed.workouts.map(w => ({
-        id: w.id || uid(),
-        date: w.date || new Date().toISOString(),
-        dayKey: w.dayKey || 'mon',
-        totalVolume: Number(w.totalVolume) || 0,
-        setsCount: Number(w.setsCount) || 0,
-        exerciseCount: Number(w.exerciseCount) || 0
-      })) : [];
-
-      return base;
-    }
-
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY) || LEGACY_KEYS.map(k => localStorage.getItem(k)).find(Boolean);
-        if (!raw) return defaultState();
-        return migrateState(JSON.parse(raw));
-      } catch (e) {
-        console.error(e);
-        return defaultState();
-      }
-    }
-
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
-
-    function escapeHtml(str) {
-      return String(str).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
-    }
-
-    function findExercise(id) { return state.exercises.find(x => x.id === id); }
-    function findDayItem(dayKey, exerciseId) { return state.days[dayKey].items.find(x => x.exerciseId === exerciseId); }
-    function uniqueParts() { return [...new Set(state.exercises.map(ex => (ex.part || '').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'cs')); }
-
-    function addExercise(name, part='', trackMode='both', valueMode='weight') {
-      const clean = name.trim();
-      if (!clean) return showToast('Zadej název cviku.', 'error');
-      if (state.exercises.some(x => x.name.toLowerCase() === clean.toLowerCase())) return showToast('Tenhle cvik už v databázi je.', 'warn');
-      state.exercises.push(defaultExercise(clean, part, trackMode, valueMode));
-      saveState();
-      showToast('Cvik úspěšně přidán do centrální DB!', 'success');
-      render();
-    }
-
-    function deleteExercise(id) {
-      const ex = findExercise(id);
-      if (!ex) return;
-      showConfirm(`Opravdu chcete smazat cvik „${ex.name}“ včetně celé historie progresu?`, () => {
-        state.exercises = state.exercises.filter(x => x.id !== id);
-        for (const d of DAYS) {
-          state.days[d.key].items = state.days[d.key].items.filter(x => x.exerciseId !== id);
-          delete state.draftDays[d.key][id];
-        }
-        saveState();
-        showToast('Cvik byl odstraněn ze systému.', 'info');
-        render();
-      }, true);
-    }
-
-    function updateExerciseConfig(id, patch) {
-      const ex = findExercise(id);
-      if (!ex) return;
-      Object.assign(ex, patch);
-      saveState();
-      render();
-    }
-
-    // Definování hlavní struktury pro srovnávání a progres bar celkového dne
-    function calculateTotalVolumeBarometer(dayKey, draftVolume) {
-      const last = lastWorkoutForDay(dayKey);
-      const dayWorkouts = state.workouts.filter(w => w.dayKey === dayKey);
-      const prVolume = dayWorkouts.length ? Math.max(...dayWorkouts.map(w => w.totalVolume)) : 0;
-      const lastVolume = last ? last.totalVolume : 0;
-
-      // Prvni trenink pro dany den
-      if (!last) {
-        return {
-          cls: 'same',
-          pctText: 'Nová řada',
-          pctClass: 'same',
-          subtext: 'Založ první trénink!',
-          barWidth: 75,
-          barColor: 'var(--accent)',
-          prevPerf: '—',
-          prPerf: prVolume ? `${prVolume} kg` : '—'
-        };
-      }
-
-      let diffPct = 0;
-      if (lastVolume > 0) {
-        diffPct = ((draftVolume - lastVolume) / lastVolume) * 100;
-      }
-
-      let cls = 'same';
-      let pctClass = 'same';
-      let pctText = '0.0%';
-      let barColor = 'var(--accent)';
-      let barWidth = 75; // Ryska 100% minulého tréninku je na 75% šířky
-
-      if (diffPct > 0) {
-        cls = 'up';
-        pctClass = 'up';
-        pctText = `+${diffPct.toFixed(1)}%`;
-        barColor = 'var(--good)';
-        barWidth = Math.min(100, 75 + (diffPct * 0.8));
-      } else if (diffPct < 0) {
-        cls = 'down';
-        pctClass = 'down';
-        pctText = `${diffPct.toFixed(1)}%`;
-        barColor = 'var(--danger)';
-        barWidth = Math.max(10, 75 + (diffPct * 0.75));
-      } else {
-        cls = 'same';
-        pctClass = 'same';
-        pctText = '0.0%';
-        barColor = 'var(--warn)';
-        barWidth = 75;
-      }
-
-      let subtext = 'Sledování trendu dne';
-      if (prVolume > 0) {
-        const prRatio = (draftVolume / prVolume) * 100;
-        if (draftVolume >= prVolume && draftVolume > 0) {
-          subtext = '🏆 NOVÝ REKORD DNE!';
-          cls = 'up';
-          pctClass = 'up';
-          barColor = 'var(--good)';
-        } else {
-          subtext = `${Math.min(100, Math.round(prRatio))}% z PR dne`;
-        }
-      }
-
-      return {
-        cls,
-        pctText,
-        pctClass,
-        subtext,
-        barWidth,
-        barColor,
-        prevPerf: `${lastVolume} kg`,
-        prPerf: prVolume ? `${prVolume} kg` : '—'
-      };
-    }
-
-    function ensureDraftSlots(dayKey, exerciseId, setCount) {
-      if (!state.draftDays[dayKey][exerciseId]) state.draftDays[dayKey][exerciseId] = [];
-      const arr = state.draftDays[dayKey][exerciseId];
-      while (arr.length < setCount) arr.push({ weight: '', reps: '' });
-      if (arr.length > setCount) arr.length = setCount;
-    }
-
-    function assignExerciseToDay(dayKey, exerciseId) {
-      if (!exerciseId) return showToast('Nejdřív vyber cvik k zařazení.', 'warn');
-      const bucket = state.days[dayKey].items;
-      if (bucket.some(x => x.exerciseId === exerciseId)) return showToast('Tenhle cvik už v dnešním plánu máš.', 'warn');
-      bucket.push({ exerciseId, setCount: 1 });
-      ensureDraftSlots(dayKey, exerciseId, 1);
-      saveState();
-      showToast('Cvik přidán do dnešního tréninku.', 'success');
-      render();
-    }
-
-    function unassignExerciseFromDay(dayKey, exerciseId) {
-      state.days[dayKey].items = state.days[dayKey].items.filter(x => x.exerciseId !== exerciseId);
-      delete state.draftDays[dayKey][exerciseId];
-      saveState();
-      showToast('Cvik byl odebrán z dnešního tréninku.', 'info');
-      render();
-    }
-
-    function addSetToDayExercise(dayKey, exerciseId) {
-      const item = findDayItem(dayKey, exerciseId);
-      if (!item) return;
-      item.setCount = Math.max(1, Number(item.setCount || 1) + 1);
-      ensureDraftSlots(dayKey, exerciseId, item.setCount);
-      saveState();
-      render();
-    }
-
-    function removeSetFromDayExercise(dayKey, exerciseId) {
-      const item = findDayItem(dayKey, exerciseId);
-      if (!item) return;
-      item.setCount = Math.max(1, Number(item.setCount || 1) - 1);
-      ensureDraftSlots(dayKey, exerciseId, item.setCount);
-      saveState();
-      render();
-    }
-
-    function moveExerciseInDay(dayKey, exerciseId, direction) {
-      const items = state.days[dayKey].items;
-      const index = items.findIndex(x => x.exerciseId === exerciseId);
-      if (index === -1) return;
-      const target = direction === 'up' ? index - 1 : index + 1;
-      if (target < 0 || target >= items.length) return;
-      [items[index], items[target]] = [items[target], items[index]];
-      saveState();
-      render();
-    }
-
-    function updateExerciseDraftValue(dayKey, exerciseId, setIndex, field, step) {
-      const item = findDayItem(dayKey, exerciseId);
-      if (!item) return;
-      ensureDraftSlots(dayKey, exerciseId, item.setCount);
-      const current = state.draftDays[dayKey][exerciseId][setIndex - 1][field];
-      const currNum = Number(current || 0);
-      const next = Math.max(0, Math.round((currNum + step) * 100) / 100);
-      const value = field === 'weight' ? String(Number(next.toFixed(1))) : String(Math.round(next));
-      updateDraft(dayKey, exerciseId, setIndex, field, value);
-      render();
-    }
-
-    function updateDraft(dayKey, exerciseId, setIndex, field, value) {
-      const item = findDayItem(dayKey, exerciseId);
-      if (!item) return;
-      ensureDraftSlots(dayKey, exerciseId, item.setCount);
-      state.draftDays[dayKey][exerciseId][setIndex - 1][field] = value;
-      saveState();
-    }
-
-    function getLastEntryForSet(exercise, setIndex) {
-      const sorted = [...exercise.history].sort((a,b)=> new Date(b.date) - new Date(a.date));
-      return sorted.find(entry => Number(entry.setIndex) === Number(setIndex));
-    }
-
-
-// Oddělený výpočet trendu pro váhu a opakování.
-// Starý společný bar míchal kg a reps do jednoho skóre, což zkreslovalo situace typu:
-// vyšší váha, ale méně opakování.
-function getBestMetricValue(exercise, metric) {
-  if (!exercise.history.length) return null;
-  const values = exercise.history
-    .map(h => metric === 'weight' ? Number(h.weight) : Number(h.reps))
-    .filter(v => Number.isFinite(v) && v > 0);
-  return values.length ? Math.max(...values) : null;
-}
-
-function metricTrend(current, previous, pr, unit) {
-  const curr = Number(current) || 0;
-  const prev = Number(previous) || 0;
-  const personalRecord = Number(pr) || 0;
-
-  if (!prev) {
-    return {
-      cls: curr ? 'same' : 'same',
-      text: curr ? `${curr}${unit}` : '—',
-      subtext: curr ? 'první zápis' : 'čeká na vstup',
-      barWidth: curr ? 75 : 8,
-      color: curr ? 'var(--accent)' : 'rgba(255,255,255,.18)'
-    };
-  }
-
-  const diff = curr - prev;
-  const diffPct = prev ? (diff / prev) * 100 : 0;
-  let cls = 'same';
-  let color = 'var(--warn)';
-  if (diff > 0) { cls = 'up'; color = 'var(--good)'; }
-  if (diff < 0) { cls = 'down'; color = 'var(--danger)'; }
-  const barWidth = Math.max(8, Math.min(100, 75 + (diffPct * 0.8)));
-  const sign = diff > 0 ? '+' : '';
-  const text = `${sign}${diff}${unit}`;
-  let subtext = `minule ${prev}${unit}`;
-  if (personalRecord && curr >= personalRecord && curr > 0) {
-    subtext = `🏆 PR ${personalRecord}${unit}`;
-    cls = 'up';
-    color = 'var(--good)';
-  }
-  return { cls, text, subtext, barWidth, color };
-}
-
-function combineTrendClass(weightTrend, repsTrend, isBW) {
-  const trends = isBW ? [repsTrend.cls] : [weightTrend.cls, repsTrend.cls];
-  const hasUp = trends.includes('up');
-  const hasDown = trends.includes('down');
-  if (hasUp && hasDown) return 'mix';
-  if (hasUp) return 'up';
-  if (hasDown) return 'down';
-  return 'same';
-}
-
-function calculateSetBarometer(exercise, setIndex, currentWeight, currentReps) {
-  const prev = getLastEntryForSet(exercise, setIndex);
-  const isBW = exercise.valueMode === 'bw';
-  const weight = isBW ? null : (currentWeight === '' || currentWeight == null ? 0 : Number(currentWeight));
-  const reps = Number(currentReps) || 0;
-
-  const previousWeight = prev && !isBW ? Number(prev.weight) || 0 : 0;
-  const previousReps = prev ? Number(prev.reps) || 0 : 0;
-  const bestWeight = isBW ? null : getBestMetricValue(exercise, 'weight');
-  const bestReps = getBestMetricValue(exercise, 'reps');
-
-  const weightTrend = isBW ? null : metricTrend(weight, previousWeight, bestWeight, 'kg');
-  const repsTrend = metricTrend(reps, previousReps, bestReps, 'r');
-  const cls = combineTrendClass(weightTrend, repsTrend, isBW);
-
-  let headline = 'Nový zápis';
-  if (prev) {
-    if (isBW) headline = `Reps: ${previousReps} → ${reps || '—'}`;
-    else headline = `Kg: ${previousWeight} → ${weight || '—'} · reps: ${previousReps} → ${reps || '—'}`;
-  }
-
+function uid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4)}
+function dayKeyToday(){return ['sun','mon','tue','wed','thu','fri','sat'][new Date().getDay()] || 'mon'}
+function defaultState(){
   return {
-    cls,
-    headline,
-    weightTrend,
-    repsTrend,
-    prevPerf: prev ? formatRecord(exercise, prev) : '—',
-    weightPR: bestWeight ? `${bestWeight}kg` : '—',
-    repsPR: bestReps ? `${bestReps}r` : '—'
+    schemaVersion:7,
+    bodyWeight:'',
+    exercises:[],
+    presets:Object.fromEntries(DAYS.map(d=>[d.key,{items:[]} ])),
+    logs:[],
+    activeSession:null,
+    ui:{selectedDay:dayKeyToday(),partFilter:'all',exerciseSearch:'',dbPartFilter:'all',dbSearch:''}
   };
 }
+function migrateState(parsed){
+  const base = defaultState();
+  base.bodyWeight = parsed.bodyWeight ?? parsed.currentBodyWeight ?? parsed.settings?.bodyWeight ?? '';
+  base.exercises = Array.isArray(parsed.exercises) ? parsed.exercises.map(ex=>({
+    id: ex.id || uid(),
+    name: ex.name || 'Bez názvu',
+    part: (ex.part || ex.category || '').trim(),
+    trackMode: ex.trackMode || 'both',
+    valueMode: ex.valueMode || 'weight',
+    history: Array.isArray(ex.history) ? ex.history.map(h=>({
+      id: h.id || uid(),
+      date: h.date || new Date().toISOString(),
+      dayKey: h.dayKey || 'mon',
+      setIndex: Math.max(1,Number(h.setIndex)||1),
+      weight: h.weight === 'BW' ? null : (h.weight ?? null),
+      reps: Number(h.reps)||0,
+      rpe: h.rpe === undefined ? null : h.rpe,
+      bodyWeight: h.bodyWeight ?? null,
+      load: h.load ?? (ex.valueMode === 'bw' ? (h.bodyWeight ?? null) : (h.weight ?? null)),
+      volume: h.volume ?? (((Number(h.weight)||0) * (Number(h.reps)||0)) || 0),
+      sessionId: h.sessionId || null
+    })) : []
+  })) : [];
 
-function renderSetTrendWidget(ex, setNo, draft) {
-  const trend = calculateSetBarometer(ex, setNo, draft.weight, draft.reps);
-  const isBW = ex.valueMode === 'bw';
-  const weightRow = isBW ? '' : `
-    <div class="trend-metric-row">
-      <div class="trend-metric-label">Váha</div>
-      <div class="metric-bar-track"><div class="metric-bar-fill" style="width:${trend.weightTrend.barWidth}%;background:${trend.weightTrend.color};"></div></div>
-      <div class="trend-metric-value ${trend.weightTrend.cls}">${trend.weightTrend.text}</div>
-    </div>
-  `;
-  return `
-    <div class="trend-widget ${trend.cls}" data-exercise-trend="${ex.id}" data-set-trend="${setNo}">
-      <div class="trend-widget-header">
-        <span>${trend.headline}</span>
-        <span class="trend-pct ${trend.cls}">${trend.cls === 'mix' ? 'MIX' : trend.cls === 'up' ? '↑' : trend.cls === 'down' ? '↓' : '→'}</span>
-      </div>
-      <div class="trend-metrics">
-        ${weightRow}
-        <div class="trend-metric-row">
-          <div class="trend-metric-label">Reps</div>
-          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:${trend.repsTrend.barWidth}%;background:${trend.repsTrend.color};"></div></div>
-          <div class="trend-metric-value ${trend.repsTrend.cls}">${trend.repsTrend.text}</div>
-        </div>
-      </div>
-      <div class="trend-widget-note">
-        <span>Minule: ${trend.prevPerf}</span>
-        <span>PR: ${isBW ? trend.repsPR : `${trend.weightPR} / ${trend.repsPR}`}</span>
-      </div>
-    </div>
-  `;
+  if (parsed.presets) {
+    for (const d of DAYS) {
+      const items = parsed.presets?.[d.key]?.items || [];
+      base.presets[d.key].items = items.map(i=>({exerciseId:i.exerciseId,setCount:Math.max(1,Number(i.setCount)||1)}));
+    }
+  } else if (parsed.days) {
+    for (const d of DAYS) {
+      const items = parsed.days?.[d.key]?.items || [];
+      base.presets[d.key].items = items.map(i=>({exerciseId:i.exerciseId,setCount:Math.max(1,Number(i.setCount)||1)}));
+    }
+  }
+
+  if (Array.isArray(parsed.logs)) {
+    base.logs = parsed.logs.map(normalizeLog);
+  } else if (Array.isArray(parsed.workouts)) {
+    base.logs = parsed.workouts.map(w=>normalizeLog({
+      id:w.id,date:w.date,dayKey:w.dayKey,totalVolume:w.totalVolume,setsCount:w.setsCount,exerciseCount:w.exerciseCount,durationSec:0,exercises:[]
+    }));
+  }
+  base.activeSession = parsed.activeSession || null;
+  base.ui = {...base.ui,...(parsed.ui||{})};
+  return base;
+}
+function normalizeLog(w){
+  return {
+    id:w.id||uid(),
+    date:w.date||new Date().toISOString(),
+    dayKey:w.dayKey||'mon',
+    startedAt:w.startedAt||w.date||new Date().toISOString(),
+    endedAt:w.endedAt||w.date||new Date().toISOString(),
+    durationSec:Number(w.durationSec)||0,
+    bodyWeight:w.bodyWeight ?? '',
+    totalVolume:Number(w.totalVolume)||0,
+    externalVolume:Number(w.externalVolume)||0,
+    bwVolume:Number(w.bwVolume)||0,
+    setsCount:Number(w.setsCount)||0,
+    exerciseCount:Number(w.exerciseCount)||0,
+    exercises:Array.isArray(w.exercises)?w.exercises:[]
+  };
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY) || LEGACY_KEYS.map(k=>localStorage.getItem(k)).find(Boolean);
+    if(!raw) return defaultState();
+    return migrateState(JSON.parse(raw));
+  }catch(e){console.error(e); return defaultState()}
+}
+function saveState(){localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}
+function escapeHtml(str){return String(str??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
+function toast(msg,type='info'){
+  const wrap=document.getElementById('toastWrap');
+  const el=document.createElement('div');
+  el.className='toast '+(type==='success'?'good':type==='warn'?'warn':type==='danger'?'danger':'');
+  el.innerHTML=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(12px)';setTimeout(()=>el.remove(),180)},3400);
+}
+function findExercise(id){return state.exercises.find(e=>e.id===id)}
+function uniqueParts(){return [...new Set(state.exercises.map(e=>(e.part||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'cs'))}
+function formatKg(n){return `${Math.round(Number(n)||0).toLocaleString('cs-CZ')} kg`}
+function formatDuration(sec){sec=Math.max(0,Number(sec)||0);const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${m}:${String(s).padStart(2,'0')}`}
+function dateTime(iso){return new Date(iso).toLocaleString('cs-CZ',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+function dateOnly(iso){return new Date(iso).toLocaleDateString('cs-CZ')}
+function effectiveLoadForSet(ex,set,bodyWeight){return ex?.valueMode==='bw' ? (Number(set.bodyWeight ?? bodyWeight ?? state.bodyWeight)||0) : (Number(set.weight)||0)}
+function setVolume(ex,set,bodyWeight){return effectiveLoadForSet(ex,set,bodyWeight) * (Number(set.reps)||0)}
+function exerciseStats(ex){
+  const hist = (ex.history||[]).filter(h=>Number(h.reps)>0 || Number(h.weight)>0 || Number(h.load)>0);
+  if(!hist.length) return {bestWeight:null,bestReps:null,bestVolume:null,last:null};
+  const bestWeight = ex.valueMode==='bw' ? null : hist.reduce((a,b)=>(Number(b.weight)||0)>(Number(a.weight)||0)?b:a,hist[0]);
+  const bestReps = hist.reduce((a,b)=>(Number(b.reps)||0)>(Number(a.reps)||0)?b:a,hist[0]);
+  const bestVolume = hist.reduce((a,b)=>(Number(b.volume)||setVolume(ex,b,b.bodyWeight))>(Number(a.volume)||setVolume(ex,a,a.bodyWeight))?b:a,hist[0]);
+  const last = [...hist].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+  return {bestWeight,bestReps,bestVolume,last};
+}
+function formatPerf(ex,h,type='full'){
+  if(!h) return '—';
+  if(type==='weight') return ex.valueMode==='bw' ? 'BW' : `${Number(h.weight)||0} kg`;
+  if(type==='reps') return `${Number(h.reps)||0} reps`;
+  if(type==='volume') return formatKg(Number(h.volume)||setVolume(ex,h,h.bodyWeight));
+  return ex.valueMode==='bw' ? `BW × ${Number(h.reps)||0}` : `${Number(h.weight)||0} kg × ${Number(h.reps)||0}`;
+}
+function getPreviousSet(ex,setIndex){
+  return [...(ex.history||[])].sort((a,b)=>new Date(b.date)-new Date(a.date)).find(h=>Number(h.setIndex)===Number(setIndex)) || null;
+}
+function trendMetric(current,previous){
+  current=Number(current)||0; previous=Number(previous)||0;
+  if(!previous && !current) return {cls:'same',txt:'—',pct:0,width:0,color:'var(--accent)'};
+  if(!previous) return {cls:'up',txt:'nové',pct:100,width:75,color:'var(--accent)'};
+  const pct=((current-previous)/previous)*100;
+  const cls=pct>0.01?'up':pct<-0.01?'down':'same';
+  const width=Math.max(8,Math.min(100,75+pct*.8));
+  const color=cls==='up'?'var(--good)':cls==='down'?'var(--danger)':'var(--warn)';
+  return {cls,txt:(pct>0?'+':'')+pct.toFixed(1)+'%',pct,width,color};
+}
+function lastLogForDay(dayKey){return [...state.logs].filter(l=>l.dayKey===dayKey).sort((a,b)=>new Date(b.date)-new Date(a.date))[0]||null}
+function bestTotalVolume(){return state.logs.length ? Math.max(...state.logs.map(l=>Number(l.totalVolume)||0)) : 0}
+function ensurePresetFromLast(dayKey){
+  const preset=state.presets[dayKey];
+  if(preset.items.length) return;
+  const last=lastLogForDay(dayKey);
+  if(last?.exercises?.length){
+    preset.items = last.exercises.map(e=>({exerciseId:e.exerciseId,setCount:Math.max(1,(e.sets||[]).length||1)})).filter(i=>findExercise(i.exerciseId));
+    saveState();
+  }
+}
+function sessionElapsed(){return state.activeSession ? Math.floor((Date.now()-new Date(state.activeSession.startedAt).getTime())/1000) : 0}
+function sessionTotals(session=state.activeSession){
+  let total=0, external=0, bw=0, sets=0;
+  if(!session) return {total,external,bw,sets};
+  session.exercises.forEach(se=>{
+    const ex=findExercise(se.exerciseId);
+    (se.sets||[]).forEach(s=>{
+      const reps=Number(s.reps)||0;
+      const load=effectiveLoadForSet(ex,s,session.bodyWeight);
+      if(reps || Number(s.weight)||0) sets++;
+      const vol=load*reps;
+      total+=vol;
+      if(ex?.valueMode==='bw') bw+=vol; else external+=vol;
+    });
+  });
+  return {total,external,bw,sets};
 }
 
-function calcDraftWorkoutVolume(dayKey) {
-      const items = state.days[dayKey].items;
-      let total = 0, sets = 0;
-      for (const item of items) {
-        const ex = findExercise(item.exerciseId);
-        if (!ex) continue;
-        ensureDraftSlots(dayKey, ex.id, item.setCount);
-        for (const setDraft of (state.draftDays[dayKey][ex.id] || [])) {
-          const reps = Number(setDraft.reps) || 0;
-          const weight = ex.valueMode === 'bw' ? 0 : (Number(setDraft.weight) || 0);
-          if (reps || weight) sets++;
-          total += weight * reps;
-        }
-      }
-      return { total, sets };
-    }
-
-    function lastWorkoutForDay(dayKey) {
-      const arr = [...(state.workouts || [])].filter(w => w.dayKey === dayKey).sort((a,b)=> new Date(b.date)-new Date(a.date));
-      return arr[0] || null;
-    }
-
-    function lastWorkoutsForDay(dayKey, limit=3) {
-      return [...(state.workouts || [])].filter(w => w.dayKey === dayKey).sort((a,b)=> new Date(b.date)-new Date(a.date)).slice(0, limit);
-    }
-
-    function formatKg(value) { return `${Math.round(Number(value) || 0).toLocaleString('cs-CZ')} kg`; }
-
-    function updateWorkoutPreview(dayKey) {
-      const container = document.getElementById('workoutSummaryContainer');
-      if (!container) return;
-      container.innerHTML = renderWorkoutSummary(dayKey);
-    }
-
-    function saveWholeWorkout(dayKey) {
-      const items = state.days[dayKey].items;
-      if (!items.length) return showToast('Tenhle tréninkový den je prázdný.', 'warn');
-      let records = [];
-      for (const item of items) {
-        const ex = findExercise(item.exerciseId);
-        if (!ex) continue;
-        ensureDraftSlots(dayKey, ex.id, item.setCount);
-        const drafts = state.draftDays[dayKey][ex.id];
-        for (let i = 0; i < item.setCount; i++) {
-          const setDraft = drafts[i] || { weight: '', reps: '' };
-          if (String(setDraft.reps).trim() === '' && String(setDraft.weight).trim() === '') continue;
-          if (!Number(setDraft.reps)) {
-            return showToast(`${ex.name} (Série ${i+1}): Vyplňte prosím počet opakování.`, 'error');
-          }
-          records.push({
-            exercise: ex,
-            setIndex: i + 1,
-            reps: Number(setDraft.reps),
-            weight: ex.valueMode === 'bw' ? null : Number(setDraft.weight)
-          });
-        }
-      }
-      if (!records.length) return showToast('Nemáš vyplněný vůbec žádný set k uložení.', 'warn');
-      
-      showConfirm(`Chcete uložit celý dnešní trénink o síle ${records.length} sérií?`, () => {
-        const now = new Date().toISOString();
-        const totalVolume = records.reduce((sum, rec) => sum + ((Number(rec.weight) || 0) * (Number(rec.reps) || 0)), 0);
-        const exerciseCount = new Set(records.map(rec => rec.exercise.id)).size;
-
-        for (const rec of records) {
-          rec.exercise.history.push({
-            id: uid(), date: now, dayKey, setIndex: rec.setIndex, weight: rec.weight, reps: rec.reps
-          });
-        }
-        state.workouts.push({ id: uid(), date: now, dayKey, totalVolume, setsCount: records.length, exerciseCount });
-        for (const item of items) {
-          state.draftDays[dayKey][item.exerciseId] = Array.from({ length: item.setCount }, () => ({ weight: '', reps: '' }));
-        }
-        saveState();
-        showToast(`Trénink úspěšně uložen! Celkem zvednuto: ${formatKg(totalVolume)}. Skvělá práce! 🏆`, 'success');
-        render();
-      });
-    }
-
-    function latestWorkoutDate(exerciseId) {
-      const ex = findExercise(exerciseId);
-      if (!ex || !ex.history.length) return null;
-      const max = ex.history.reduce((a,b)=> new Date(a.date) > new Date(b.date) ? a : b);
-      return new Date(max.date).toLocaleDateString('cs-CZ');
-    }
-
-    function countTabItems(tabKey) {
-      return tabKey === DATABASE_TAB ? state.exercises.length : state.days[tabKey].items.length;
-    }
-
-    function formatRecord(ex, h) { return ex.valueMode === 'bw' ? `${h.reps} reps` : `${h.weight} kg × ${h.reps}`; }
-    
-    // Silové skóre: buď celkový objem, nebo čisté reps u BW cviků
-    function scoreRecord(ex, h) { 
-      if (!h) return 0;
-      if (ex.valueMode === 'bw') return Number(h.reps) || 0;
-      return (Number(h.weight) || 0) * (Number(h.reps) || 0) || Number(h.reps); 
-    }
-
-    function bestWorstRecords(ex) {
-      if (!ex.history.length) return { best: null, worst: null };
-      const arr = [...ex.history].sort((a,b) => scoreRecord(ex,b) - scoreRecord(ex,a));
-      return { best: arr[0], worst: arr[arr.length - 1] };
-    }
-
-    function renderTabs() {
-      const el = document.getElementById('mainTabs');
-      const dayTabs = DAYS.map(t => `
-        <button class="tab-btn ${t.key === activeTab ? 'active' : ''}" data-tab="${t.key}">
-          <div class="tab-name tab-name-full">${t.label}</div>
-          <div class="tab-name tab-name-short">${t.short}</div>
-          <div class="tab-meta">${countTabItems(t.key)}</div>
-        </button>
-      `).join('');
-      el.innerHTML = `
-        <div class="day-tabs">${dayTabs}</div>
-        <div class="db-tab-wrap">
-          <button class="tab-btn ${activeTab === DATABASE_TAB ? 'active' : ''}" data-tab="${DATABASE_TAB}">
-            <div class="tab-name">Centrální databáze všech cviků</div>
-            <div class="tab-meta">${countTabItems(DATABASE_TAB)} cviků v systému</div>
-          </button>
+function render(){
+  clearInterval(timerInterval);
+  const app=document.getElementById('app');
+  if(view==='setup') app.innerHTML=renderSetup();
+  if(view==='session') app.innerHTML=renderSession();
+  if(view==='logs') app.innerHTML=renderLogs();
+  if(view==='db') app.innerHTML=renderDb();
+  bindCommon();
+  if(view==='setup') bindSetup();
+  if(view==='session') bindSession();
+  if(view==='logs') bindLogs();
+  if(view==='db') bindDb();
+}
+function renderDayButtons(){
+  return `<div class="day-grid">${DAYS.map(d=>{
+    const count=(state.presets[d.key]?.items||[]).length;
+    return `<button class="day-btn ${selectedDay===d.key?'active':''}" data-day="${d.key}"><div class="day-short">${d.short}</div><div class="day-count">${count} cviků</div></button>`
+  }).join('')}</div>`
+}
+function renderPartOptions(selected='all'){
+  return `<option value="all" ${selected==='all'?'selected':''}>Všechny partie</option>`+uniqueParts().map(p=>`<option value="${escapeHtml(p)}" ${selected===p?'selected':''}>${escapeHtml(p)}</option>`).join('')
+}
+function renderSetup(){
+  ensurePresetFromLast(selectedDay);
+  const preset=state.presets[selectedDay];
+  const last=lastLogForDay(selectedDay);
+  const best=bestTotalVolume();
+  const dayBest=Math.max(0,...state.logs.filter(l=>l.dayKey===selectedDay).map(l=>Number(l.totalVolume)||0));
+  return `
+    <section class="card">
+      <div class="card-head"><h2>Sestavení tréninku</h2><span class="pill blue">${DAY_NAMES[selectedDay]}</span></div>
+      <div class="card-body">
+        ${renderDayButtons()}
+        <div class="metric-row">
+          <div class="metric"><div class="t">Aktuální váha</div><div class="v">${state.bodyWeight?escapeHtml(state.bodyWeight)+' kg':'není'}</div><div class="s">pro BW cviky</div></div>
+          <div class="metric"><div class="t">Poslední ${DAY_SHORT[selectedDay]}</div><div class="v">${last?formatKg(last.totalVolume):'—'}</div><div class="s">${last?dateOnly(last.date):'bez logu'}</div></div>
+          <div class="metric"><div class="t">PR dne</div><div class="v">${dayBest?formatKg(dayBest):'—'}</div><div class="s">All-time: ${best?formatKg(best):'—'}</div></div>
         </div>
-      `;
-      el.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => { activeTab = btn.dataset.tab; render(); }));
-    }
-
-    function renderPanel() {
-      const title = document.getElementById('panelTitle');
-      const actions = document.getElementById('panelActions');
-      const body = document.getElementById('panelBody');
-      if (activeTab === DATABASE_TAB) {
-        title.textContent = 'Centrální databáze cviků';
-        actions.innerHTML = `<span class="pill">${state.exercises.length} definovaných cviků</span>`;
-        body.innerHTML = renderDatabasePanel();
-        bindDatabasePanel();
-        return;
-      }
-      const dayObj = DAYS.find(x => x.key === activeTab);
-      title.textContent = dayObj.label;
-      actions.innerHTML = `<span class="pill">Autosave draftu aktivní</span>`;
-      body.innerHTML = renderDayPanel(dayObj);
-      bindDayPanel(dayObj.key);
-    }
-
-    function renderPartOptions(selected='all') {
-      return `<option value="all" ${selected==='all'?'selected':''}>Všechny partie</option>` + uniqueParts().map(part => `<option value="${escapeHtml(part)}" ${selected===part?'selected':''}>${escapeHtml(part)}</option>`).join('');
-    }
-
-    // JEDINÁ HLAVNÍ METODA PRO SUMÁŘ TRÉNINKU (obsahuje silový barometr celého dne)
-    function renderWorkoutSummary(dayKey) {
-      const draft = calcDraftWorkoutVolume(dayKey);
-      const last = lastWorkoutForDay(dayKey);
-      const trend = calculateTotalVolumeBarometer(dayKey, draft.total);
-      return `
-        <div class="workout-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0;">
-          <div class="metric-card" style="padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,0.2);">
-            <div class="metric-title" style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Aktuální objem</div>
-            <div class="metric-value" id="workoutVolumeValue" style="font-size: 16px; font-weight: 800; margin-top: 4px;">${formatKg(draft.total)}</div>
-            <div class="metric-sub" id="workoutVolumeSub" style="font-size: 10px; color: var(--muted); margin-top: 2px;">${draft.sets} vyplněných setů</div>
-          </div>
-          
-          <!-- Celkový silový barometr dne -->
-          <div class="metric-card" style="padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,0.2); grid-column: span 1;">
-            <div class="metric-title" style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Silový Barometr dne</div>
-            <div class="trend-widget ${trend.cls}" style="margin-top: 6px; border: none; background: transparent; padding: 0; min-height: auto; width: 100%;">
-              <div class="trend-widget-header" style="margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
-                <span class="trend-pct ${trend.pctClass}" style="font-size: 10px; font-weight: 800; padding: 1px 5px; border-radius: 4px;">${trend.pctText}</span>
-                <span class="trend-subtext" style="font-size: 9px; color: var(--muted);">${trend.subtext}</span>
-              </div>
-              <div class="trend-bar-track" style="height: 4px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; width: 100%; position: relative;">
-                <div style="position: absolute; left: 75%; top: 0; width: 2px; height: 100%; background: rgba(255,255,255,0.35); z-index: 2;"></div>
-                <div class="trend-bar" style="width: ${trend.barWidth}%; background-color: ${trend.barColor}; height: 100%; border-radius: 999px;"></div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="metric-card" style="padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,0.2);">
-            <div class="metric-title" style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Počet cviků</div>
-            <div class="metric-value" style="font-size: 16px; font-weight: 800; margin-top: 4px;">${state.days[dayKey].items.length}</div>
-            <div class="metric-sub" style="font-size: 10px; color: var(--muted); margin-top: 2px;">Připraveno na dnes</div>
-          </div>
+        <div class="row" style="margin-bottom:10px">
+          <button id="bodyWeightBtn" class="warn">⚖️ Nastavit aktuální tělesnou hmotnost</button>
+          <button id="cloneLastBtn" class="ghost">↻ Načíst poslední trénink dne</button>
         </div>
-      `;
-    }
-
-    function renderDayPanel(dayObj) {
-      const filterPart = state.ui.dayPartFilters[dayObj.key] || 'all';
-      const items = state.days[dayObj.key].items;
-      return `
-        <!-- Obal pro hladký real-time update celkového počítadla -->
-        <div id="workoutSummaryContainer">
-          ${renderWorkoutSummary(dayObj.key)}
-        </div>
-        <div class="exercise-picker">
-          <div class="picker-grid">
-            <div class="field"><label>Filtrovat podle svalů</label><select id="dayPartFilter">${renderPartOptions(filterPart)}</select></div>
-            <div class="field"><label>Vyhledat cvik pro vložení</label><input id="assignExerciseSearch" placeholder="Hledej v DB..." value="${escapeHtml(state.ui.dayExerciseSearch?.[dayObj.key] || '')}" /></div>
+        <div class="picker">
+          <div class="grid">
+            <div><label>Partie</label><select id="partFilter">${renderPartOptions(state.ui.partFilter)}</select></div>
+            <div><label>Hledat cvik</label><input id="exerciseSearch" placeholder="např. bench, shyby..." value="${escapeHtml(state.ui.exerciseSearch||'')}"></div>
           </div>
           <div class="picker-actions">
-            <select id="assignExerciseSelect"></select>
-            <button id="assignExerciseBtn" class="primary">Přidat do dnešního tréninku</button>
+            <select id="exerciseSelect"></select>
+            <button id="addToPlanBtn" class="primary">Přidat cvik</button>
           </div>
         </div>
-        <div id="dayExerciseList" class="exercise-list" style="margin-top:14px">
-          ${items.map(item => renderDayExerciseCard(dayObj.key, item)).join('') || `<div class="empty">Dneska volno? Přidej si cviky přes vyhledávač výše. 🦾</div>`}
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-head"><h2>Preset pro ${DAY_NAMES[selectedDay]}</h2><span class="pill">${preset.items.length} cviků</span></div>
+      <div class="card-body">
+        <div class="plan-list">
+          ${preset.items.map((item,i)=>renderPlanItem(item,i,preset.items.length)).join('') || `<div class="tiny">Zatím prázdno. Přidej cviky nahoře a udělej z toho plán, ne smutný poznámkový blok.</div>`}
         </div>
-        <div class="save-wrap">
-          <div class="card">
-            <div class="row" style="justify-content:space-between; gap:12px;">
-              <div><strong>Máš hotovo?</strong><div class="tiny">Zápis do trvalé historie provedete jedním kliknutím.</div></div>
-              <button id="saveWorkoutBtn" class="primary">Uložit celý dnešní trénink</button>
-            </div>
-          </div>
-        </div>
-      `;
-    }
+        <div class="sticky-start"><button id="startWorkoutBtn" class="primary start-btn">Start tréninku</button></div>
+      </div>
+    </section>`;
+}
+function renderPlanItem(item,index,total){
+  const ex=findExercise(item.exerciseId); if(!ex) return '';
+  return `<div class="plan-item">
+    <div class="plan-top">
+      <div><div class="plan-title">${index+1}. ${escapeHtml(ex.name)}</div><div class="tiny">${escapeHtml(ex.part||'Bez partie')} · ${ex.valueMode==='bw'?'BW':'kg'} · ${item.setCount} sérií</div></div>
+      <div class="plan-controls">
+        <button class="icon-btn" data-move="up" data-ex="${ex.id}" ${index===0?'disabled':''}>↑</button>
+        <button class="icon-btn" data-move="down" data-ex="${ex.id}" ${index===total-1?'disabled':''}>↓</button>
+        <button class="icon-btn good" data-set="add" data-ex="${ex.id}">+</button>
+        <button class="icon-btn warn" data-set="remove" data-ex="${ex.id}">−</button>
+        <button class="icon-btn danger" data-remove="${ex.id}">×</button>
+      </div>
+    </div>
+  </div>`;
+}
+function bindSetup(){
+  document.querySelectorAll('[data-day]').forEach(btn=>btn.addEventListener('click',()=>{selectedDay=btn.dataset.day;state.ui.selectedDay=selectedDay;ensurePresetFromLast(selectedDay);saveState();render()}));
+  const part=document.getElementById('partFilter'), search=document.getElementById('exerciseSearch'), sel=document.getElementById('exerciseSelect');
+  function fillSelect(){
+    const q=(search.value||'').toLowerCase(); const p=part.value;
+    const selectedIds=new Set((state.presets[selectedDay].items||[]).map(i=>i.exerciseId));
+    const list=state.exercises.filter(ex=>!selectedIds.has(ex.id) && (p==='all'||ex.part===p) && (`${ex.name} ${ex.part}`).toLowerCase().includes(q));
+    sel.innerHTML=`<option value="">Vyber cvik...</option>`+list.map(ex=>`<option value="${ex.id}">${escapeHtml(ex.name)} · ${escapeHtml(ex.part||'bez partie')}</option>`).join('');
+  }
+  part?.addEventListener('change',()=>{state.ui.partFilter=part.value;saveState();fillSelect()});
+  search?.addEventListener('input',()=>{state.ui.exerciseSearch=search.value;saveState();fillSelect()});
+  fillSelect();
+  document.getElementById('addToPlanBtn')?.addEventListener('click',()=>{
+    const id=sel.value;if(!id)return toast('Nejdřív vyber cvik.','warn');
+    state.presets[selectedDay].items.push({exerciseId:id,setCount:1});saveState();toast('Cvik přidaný do presetu.','success');render();
+  });
+  document.querySelectorAll('[data-move]').forEach(btn=>btn.addEventListener('click',()=>movePlanExercise(btn.dataset.ex,btn.dataset.move)));
+  document.querySelectorAll('[data-set]').forEach(btn=>btn.addEventListener('click',()=>changePlanSets(btn.dataset.ex,btn.dataset.set==='add'?1:-1)));
+  document.querySelectorAll('[data-remove]').forEach(btn=>btn.addEventListener('click',()=>removeFromPlan(btn.dataset.remove)));
+  document.getElementById('bodyWeightBtn')?.addEventListener('click',()=>{
+    const val=prompt('Zadej aktuální tělesnou hmotnost v kg:', state.bodyWeight || '');
+    if(val===null)return; const n=String(val).replace(',','.').trim();
+    if(n!=='' && (Number.isNaN(Number(n)) || Number(n)<=0)) return toast('Tohle jako váha nevypadá.','warn');
+    state.bodyWeight=n; saveState(); render();
+  });
+  document.getElementById('cloneLastBtn')?.addEventListener('click',()=>{
+    const last=lastLogForDay(selectedDay);
+    if(!last?.exercises?.length)return toast('Pro tenhle den zatím nemám uložený trénink.','warn');
+    if(!confirm('Přepsat aktuální preset posledním uloženým tréninkem pro tenhle den?'))return;
+    state.presets[selectedDay].items=last.exercises.map(e=>({exerciseId:e.exerciseId,setCount:Math.max(1,(e.sets||[]).length||1)})).filter(i=>findExercise(i.exerciseId));
+    saveState();toast('Preset načtený z posledního tréninku.','success');render();
+  });
+  document.getElementById('startWorkoutBtn')?.addEventListener('click',startWorkout);
+}
+function movePlanExercise(exId,dir){
+  const items=state.presets[selectedDay].items; const i=items.findIndex(x=>x.exerciseId===exId); if(i<0)return;
+  const t=dir==='up'?i-1:i+1;if(t<0||t>=items.length)return; [items[i],items[t]]=[items[t],items[i]];saveState();render();
+}
+function changePlanSets(exId,delta){const item=state.presets[selectedDay].items.find(i=>i.exerciseId===exId);if(!item)return;item.setCount=Math.max(1,(Number(item.setCount)||1)+delta);saveState();render()}
+function removeFromPlan(exId){state.presets[selectedDay].items=state.presets[selectedDay].items.filter(i=>i.exerciseId!==exId);saveState();render()}
+function startWorkout(){
+  const items=state.presets[selectedDay].items.filter(i=>findExercise(i.exerciseId));
+  if(!items.length)return toast('Nejdřív si do dne přidej aspoň jeden cvik.','warn');
+  if(!state.bodyWeight && items.some(i=>findExercise(i.exerciseId)?.valueMode==='bw')){
+    if(!confirm('V tréninku máš BW cviky, ale nemáš nastavenou tělesnou hmotnost. Pokračovat? BW objem bude 0 kg.')) return;
+  }
+  state.activeSession={
+    id:uid(), dayKey:selectedDay, startedAt:new Date().toISOString(), bodyWeight:state.bodyWeight||'', currentIndex:0,
+    exercises:items.map(i=>({exerciseId:i.exerciseId,setCount:Math.max(1,Number(i.setCount)||1),sets:Array.from({length:Math.max(1,Number(i.setCount)||1)},()=>({weight:'',reps:'',rpe:''}))}))
+  };
+  saveState(); view='session'; render();
+}
 
-    function renderDatabasePanel() {
-      return `
-        <div class="form-grid">
-          <div class="field"><label>Název nového cviku</label><input id="exerciseNameInput" placeholder="Např. Incline Dumbbell Press" /></div>
-          <div class="field"><label>Partie / Svalová skupina</label><input id="exercisePartInput" placeholder="Např. Hrudník" /></div>
-          <div class="field">
-            <label>Primární cíl sledování</label>
-            <select id="exerciseTrackModeInput">
-              <option value="both" selected>Váha i opakování (Klasický progres)</option>
-              <option value="weight">Pouze váha</option>
-              <option value="reps">Pouze opakování</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Typ odporu</label>
-            <select id="exerciseValueModeInput">
-              <option value="weight" selected>Standardní závaží (kg)</option>
-              <option value="bw">Vlastní váha těla (BW)</option>
-            </select>
-          </div>
-        </div>
-        <div class="row" style="margin-top:12px"><button id="addExerciseBtn" class="primary">Zapsat nový cvik do DB</button></div>
-        <div class="hr"></div>
-        <div class="form-grid">
-          <div class="field"><label>Filtr partie</label><select id="dbPartFilter">${renderPartOptions(state.ui.dbPartFilter)}</select></div>
-          <div class="field"><label>Rychlé hledání</label><input id="exerciseSearchInput" placeholder="Napiš název..." value="${escapeHtml(state.ui.dbSearch || '')}" /></div>
-        </div>
-        <div id="exerciseDbList" class="exercise-list" style="margin-top:12px"></div>
-      `;
-    }
-
-    function renderDbItem(ex) {
-      const { best } = bestWorstRecords(ex);
-      return `
-        <div class="db-item">
-          <div class="db-item-head">
-            <div>
-              <div><strong>${escapeHtml(ex.name)}</strong></div>
-              <div class="db-meta">${escapeHtml(ex.part || 'Bez zařazení')} · ${ex.history.length} sérií v historii</div>
-              ${best ? `<div class="tiny">Osobní maximum: ${formatRecord(ex, best)}</div>` : `<div class="tiny">Zatím neodtrénováno</div>`}
-            </div>
-            <div class="db-item-controls">
-              <button data-del-ex="${ex.id}" class="danger">Odstranit kompletně</button>
-            </div>
-          </div>
-          <details class="db-details">
-            <summary><span class="arrow">▶</span> Zobrazit celou historii sérií</summary>
-            <div class="full-history">
-              ${[...ex.history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(h => `
-                <div class="history-line">${new Date(h.date).toLocaleDateString('cs-CZ')} - Série ${h.setIndex}: ${formatRecord(ex, h)}</div>
-              `).join('') || '<div class="muted">Žádné záznamy</div>'}
-            </div>
-          </details>
-        </div>
-      `;
-    }
-
-    function bindDatabasePanel() {
-      const list = document.getElementById('exerciseDbList');
-      const search = document.getElementById('exerciseSearchInput');
-      const partFilter = document.getElementById('dbPartFilter');
-      const renderList = () => {
-        state.ui.dbSearch = search.value;
-        state.ui.dbPartFilter = partFilter.value;
-        saveState();
-        const q = search.value.toLowerCase();
-        const filtered = state.exercises.filter(ex => {
-          return (`${ex.name} ${ex.part}`).toLowerCase().includes(q) && (partFilter.value === 'all' || ex.part === partFilter.value);
-        });
-        list.innerHTML = filtered.map(renderDbItem).join('') || `<div class="empty">Žádný cvik neodpovídá filtru.</div>`;
-        list.querySelectorAll('[data-del-ex]').forEach(btn => btn.addEventListener('click', () => deleteExercise(btn.dataset.delEx)));
-      };
-      document.getElementById('addExerciseBtn').addEventListener('click', () => {
-        addExercise(document.getElementById('exerciseNameInput').value, document.getElementById('exercisePartInput').value, document.getElementById('exerciseTrackModeInput').value, document.getElementById('exerciseValueModeInput').value);
-        document.getElementById('exerciseNameInput').value = '';
-      });
-      search.addEventListener('input', renderList);
-      partFilter.addEventListener('change', renderList);
-      renderList();
-    }
-
-    function renderDayExerciseCard(dayKey, item) {
-      const ex = findExercise(item.exerciseId);
-      if (!ex) return '';
-      ensureDraftSlots(dayKey, ex.id, item.setCount);
-      const drafts = state.draftDays[dayKey][ex.id];
-      const isBW = ex.valueMode === 'bw';
-
-      // Absolutní PR pro zobrazení v záhlaví cviku
-      const { best } = bestWorstRecords(ex);
-      const prBadge = best ? `<span class="pr-badge">👑 PR: ${formatRecord(ex, best)}</span>` : '';
-
-      return `
-        <div class="exercise-card">
-          <div class="exercise-head">
-            <div>
-              <div class="exercise-title" style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                <span>${escapeHtml(ex.name)}</span>
-                ${prBadge}
-              </div>
-              <div class="mini" style="margin-top:4px;">${escapeHtml(ex.part || 'Bez partie')}</div>
-            </div>
-            <div class="row">
-              <button data-add-set="${ex.id}" class="good">+ Set</button>
-              <button data-remove-set="${ex.id}" class="warn">- Set</button>
-              <button data-removefromday="${ex.id}" class="danger">Odebrat</button>
-            </div>
-          </div>
-          <div class="sets">
-            ${Array.from({ length: item.setCount }, (_, i) => {
-              const setNo = i + 1;
-              const draft = drafts[i] || { weight: '', reps: '' };
-              const trend = calculateSetBarometer(ex, setNo, draft.weight, draft.reps);
-              return `
-                <div class="set-row ${isBW ? 'bw' : ''}" data-exercise="${ex.id}" data-set="${setNo}">
-                  <div class="set-label">Série ${setNo}</div>
-                  ${isBW ? '' : `
-                    <div class="value-control">
-                      <button type="button" class="step-btn secondary weight-minus">−</button>
-                      <input type="number" step="0.5" placeholder="kg" class="weight-input" value="${escapeHtml(draft.weight)}" />
-                      <button type="button" class="step-btn secondary weight-plus">+</button>
-                    </div>
-                  `}
-                  <div class="value-control">
-                    <button type="button" class="step-btn secondary reps-minus">−</button>
-                    <input type="number" placeholder="reps" class="reps-input" value="${escapeHtml(draft.reps)}" />
-                    <button type="button" class="step-btn secondary reps-plus">+</button>
-                  </div>
-                  
-                  ${renderSetTrendWidget(ex, setNo, draft)}
-
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      `;
-    }
-
-    function renderAssignSelect(dayKey) {
-      const select = document.getElementById('assignExerciseSelect');
-      if (!select) return;
-      const search = (state.ui.dayExerciseSearch?.[dayKey] || '').toLowerCase();
-      const available = state.exercises.filter(ex => ex.name.toLowerCase().includes(search));
-      select.innerHTML = `<option value="">Vyber cvik...</option>` + available.map(ex => `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`).join('');
-    }
-
-    function bindDayPanel(dayKey) {
-      renderAssignSelect(dayKey);
-      document.getElementById('dayPartFilter').addEventListener('change', (e) => { state.ui.dayPartFilters[dayKey] = e.target.value; saveState(); render(); });
-      document.getElementById('assignExerciseSearch').addEventListener('input', (e) => { state.ui.dayExerciseSearch[dayKey] = e.target.value; renderAssignSelect(dayKey); });
-      document.getElementById('assignExerciseBtn').addEventListener('click', () => assignExerciseToDay(dayKey, document.getElementById('assignExerciseSelect').value));
-      document.getElementById('saveWorkoutBtn').addEventListener('click', () => saveWholeWorkout(dayKey));
-
-      const wrap = document.getElementById('dayExerciseList');
-      if (!wrap) return;
-      wrap.querySelectorAll('[data-removefromday]').forEach(btn => btn.addEventListener('click', () => unassignExerciseFromDay(dayKey, btn.dataset.removefromday)));
-      wrap.querySelectorAll('[data-add-set]').forEach(btn => btn.addEventListener('click', () => addSetToDayExercise(dayKey, btn.dataset.addSet)));
-      wrap.querySelectorAll('[data-remove-set]').forEach(btn => btn.addEventListener('click', () => removeSetFromDayExercise(dayKey, btn.dataset.removeSet)));
-
-      wrap.querySelectorAll('.set-row').forEach(row => {
-        const exerciseId = row.dataset.exercise;
-        const setIndex = Number(row.dataset.set);
-        const ex = findExercise(exerciseId);
-
-        const weightInput = row.querySelector('.weight-input');
-        const repsInput = row.querySelector('.reps-input');
-        
-        // Reaktivní aktualizace silového barometru v reálném čase
-        const updateRealTimeTrend = () => {
-          const wVal = weightInput ? weightInput.value : '';
-          const rVal = repsInput ? repsInput.value : '';
-          const trendWidget = row.querySelector(`[data-exercise-trend="${exerciseId}"][data-set-trend="${setIndex}"]`);
-          if (trendWidget) {
-            const draft = { weight: wVal, reps: rVal };
-            trendWidget.outerHTML = renderSetTrendWidget(ex, setIndex, draft);
-          }
-        };
-
-        if (weightInput) {
-          weightInput.addEventListener('input', () => { 
-            updateDraft(dayKey, exerciseId, setIndex, 'weight', weightInput.value); 
-            updateRealTimeTrend(); 
-            updateWorkoutPreview(dayKey); 
-          });
-          row.querySelector('.weight-minus').addEventListener('click', () => {
-            updateExerciseDraftValue(dayKey, exerciseId, setIndex, 'weight', -2.5);
-            updateRealTimeTrend();
-            updateWorkoutPreview(dayKey);
-          });
-          row.querySelector('.weight-plus').addEventListener('click', () => {
-            updateExerciseDraftValue(dayKey, exerciseId, setIndex, 'weight', 2.5);
-            updateRealTimeTrend();
-            updateWorkoutPreview(dayKey);
-          });
-        }
-        if (repsInput) {
-          repsInput.addEventListener('input', () => { 
-            updateDraft(dayKey, exerciseId, setIndex, 'reps', repsInput.value); 
-            updateRealTimeTrend(); 
-            updateWorkoutPreview(dayKey); 
-          });
-          row.querySelector('.reps-minus').addEventListener('click', () => {
-            updateExerciseDraftValue(dayKey, exerciseId, setIndex, 'reps', -1);
-            updateRealTimeTrend();
-            updateWorkoutPreview(dayKey);
-          });
-          row.querySelector('.reps-plus').addEventListener('click', () => {
-            updateExerciseDraftValue(dayKey, exerciseId, setIndex, 'reps', 1);
-            updateRealTimeTrend();
-            updateWorkoutPreview(dayKey);
-          });
-        }
-      });
-    }
-
-    function render() { renderTabs(); renderPanel(); }
-
-    document.getElementById('resetBtn').addEventListener('click', () => { 
-      showConfirm('Opravdu chcete vymazat celou aplikaci? Všechny tréninky a historie progresu budou navždy odstraněny.', () => { 
-        localStorage.removeItem(STORAGE_KEY); 
-        state = defaultState(); 
-        toggleDrawer();
-        showToast('Aplikace byla úspěšně resetována.', 'info');
-        render(); 
-      }, true);
+function renderSession(){
+  const s=state.activeSession; if(!s)return `<div class="card"><div class="card-body">Žádný aktivní trénink.</div></div>`;
+  const idx=Math.min(Math.max(0,Number(s.currentIndex)||0),s.exercises.length-1); s.currentIndex=idx;
+  const se=s.exercises[idx]; const ex=findExercise(se.exerciseId); const totals=sessionTotals(s);
+  return `<div class="session-top">
+    <div class="session-bar"><div><div class="tiny">${DAY_NAMES[s.dayKey]} · aktivní trénink</div><div class="timer" id="timer">${formatDuration(sessionElapsed())}</div></div><button id="abortSessionBtn" class="danger">Ukončit bez uložení</button></div>
+    <div class="metric-row">
+      <div class="metric"><div class="t">Objem</div><div class="v" id="sessionVolume">${formatKg(totals.total)}</div><div class="s">včetně BW</div></div>
+      <div class="metric"><div class="t">Sety</div><div class="v" id="sessionSets">${totals.sets}</div><div class="s">vyplněno</div></div>
+      <div class="metric"><div class="t">BW</div><div class="v">${s.bodyWeight?escapeHtml(s.bodyWeight)+' kg':'—'}</div><div class="s">pro BW cviky</div></div>
+    </div>
+  </div>
+  <section class="exercise-hero">
+    ${renderExerciseSession(ex,se,idx,s.exercises.length)}
+  </section>
+  ${renderSessionNav(idx,s.exercises.length)}`;
+}
+function renderExerciseSession(ex,se,idx,total){
+  if(!ex)return `<div>Cvik nenalezen.</div>`;
+  const st=exerciseStats(ex);
+  const isBw=ex.valueMode==='bw';
+  return `<div class="exercise-index">Cvik ${idx+1} z ${total} · ${escapeHtml(ex.part||'Bez partie')}</div>
+    <div class="exercise-name">${escapeHtml(ex.name)}</div>
+    <div class="pr-grid">
+      <div class="pr-card"><div class="t">PR váha</div><div class="v">${isBw?'BW':formatPerf(ex,st.bestWeight,'weight')}</div></div>
+      <div class="pr-card"><div class="t">PR reps</div><div class="v">${formatPerf(ex,st.bestReps,'reps')}</div></div>
+      <div class="pr-card"><div class="t">PR objem / set</div><div class="v">${formatPerf(ex,st.bestVolume,'volume')}</div></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button id="addSessionSet" class="good">+ Série</button>
+      <button id="removeSessionSet" class="warn">− Série</button>
+    </div>
+    <div class="set-list">
+      ${se.sets.map((set,i)=>renderSessionSet(ex,set,i)).join('')}
+    </div>
+    <div class="progress-dots">${Array.from({length:total},(_,i)=>`<span class="dot ${i===idx?'active':i<idx?'done':''}"></span>`).join('')}</div>`;
+}
+function renderSessionSet(ex,set,i){
+  const setNo=i+1; const isBw=ex.valueMode==='bw'; const prev=getPreviousSet(ex,setNo);
+  const bodyW=state.activeSession?.bodyWeight || state.bodyWeight;
+  const currentLoad=effectiveLoadForSet(ex,set,bodyW);
+  const prevLoad=prev?effectiveLoadForSet(ex,prev,prev.bodyWeight || bodyW):0;
+  const trLoad=trendMetric(currentLoad,prevLoad);
+  const trReps=trendMetric(Number(set.reps)||0, prev?Number(prev.reps)||0:0);
+  const trVol=trendMetric((Number(set.reps)||0)*currentLoad, prev?setVolume(ex,prev,prev.bodyWeight || bodyW):0);
+  return `<div class="set-card" data-set-index="${i}">
+    <div class="set-title"><strong>Série ${setNo}</strong><span class="pill">minule: ${prev?formatPerf(ex,prev):'—'}</span></div>
+    <div class="set-inputs ${isBw?'bw':''}">
+      ${isBw?`<div><div class="input-label">Váha</div><div class="bw-box">BW ${bodyW?escapeHtml(bodyW)+' kg':''}</div></div>`:`<div><div class="input-label">Váha kg</div>${numControl('weight',set.weight,'0.5','kg')}</div>`}
+      <div><div class="input-label">Opakování</div>${numControl('reps',set.reps,'1','reps')}</div>
+      <div class="rpe-field"><div class="input-label">RPE</div>${numControl('rpe',set.rpe,'0.5','RPE')}</div>
+    </div>
+    <div class="trend-stack">
+      ${isBw?'':trendLine('Váha',trLoad)}
+      ${trendLine('Reps',trReps)}
+      ${trendLine('Objem',trVol)}
+    </div>
+  </div>`;
+}
+function numControl(field,value,step,placeholder){return `<div class="num-control" data-field="${field}"><button class="step ghost" data-step="-${step}">−</button><input type="number" step="${step}" placeholder="${placeholder}" value="${escapeHtml(value)}"><button class="step ghost" data-step="${step}">+</button></div>`}
+function trendLine(name,tr){return `<div class="trend-line"><div class="name">${name}</div><div class="bar-track"><div class="bar" style="width:${tr.width}%;background:${tr.color}"></div></div><div class="delta ${tr.cls}">${tr.txt}</div></div>`}
+function renderSessionNav(idx,total){
+  const last=idx===total-1;
+  return `<div class="session-nav"><div class="session-nav-inner ${idx===0 && total===1?'single':''}">
+    ${idx>0?`<button id="prevExerciseBtn" class="big-nav ghost">← Zpět</button>`:''}
+    ${last?`<button id="finishWorkoutBtn" class="big-nav primary">Dokončit trénink</button>`:`<button id="nextExerciseBtn" class="big-nav primary">Další cvik →</button>`}
+  </div></div>`;
+}
+function bindSession(){
+  timerInterval=setInterval(()=>{const el=document.getElementById('timer');if(el)el.textContent=formatDuration(sessionElapsed())},1000);
+  document.getElementById('abortSessionBtn')?.addEventListener('click',()=>{if(confirm('Zahodit aktivní trénink bez uložení?')){state.activeSession=null;saveState();view='setup';render()}});
+  document.getElementById('prevExerciseBtn')?.addEventListener('click',()=>{state.activeSession.currentIndex=Math.max(0,state.activeSession.currentIndex-1);saveState();render()});
+  document.getElementById('nextExerciseBtn')?.addEventListener('click',()=>{state.activeSession.currentIndex=Math.min(state.activeSession.exercises.length-1,state.activeSession.currentIndex+1);saveState();render()});
+  document.getElementById('finishWorkoutBtn')?.addEventListener('click',finishWorkout);
+  document.getElementById('addSessionSet')?.addEventListener('click',()=>{const se=currentSessionExercise();se.sets.push({weight:'',reps:'',rpe:''});se.setCount=se.sets.length;saveState();render()});
+  document.getElementById('removeSessionSet')?.addEventListener('click',()=>{const se=currentSessionExercise();if(se.sets.length>1){se.sets.pop();se.setCount=se.sets.length;saveState();render()}});
+  document.querySelectorAll('.set-card').forEach(card=>{
+    const setIndex=Number(card.dataset.setIndex);
+    card.querySelectorAll('.num-control').forEach(ctrl=>{
+      const field=ctrl.dataset.field; const input=ctrl.querySelector('input');
+      input.addEventListener('input',()=>{updateSessionSet(setIndex,field,input.value,false)});
+      ctrl.querySelectorAll('.step').forEach(btn=>btn.addEventListener('click',()=>{
+        const curr=Number(input.value||0); let next=curr+Number(btn.dataset.step);
+        if(field==='rpe') next=Math.max(0,Math.min(10,next)); else next=Math.max(0,next);
+        input.value=String(Number(next.toFixed(1))); updateSessionSet(setIndex,field,input.value,true);
+      }));
     });
-
-    document.getElementById('seedDemoBtn').addEventListener('click', () => {
-      state = defaultState();
-      const e1 = defaultExercise('Bench Press', 'Hrudník');
-      const e2 = defaultExercise('Shyby nadhmatem', 'Záda', 'reps', 'bw');
-      state.exercises.push(e1, e2);
-
-      // Přidáme nějakou simulovanou historii, aby hned barometr fungoval
-      const baseDate = new Date();
-      e1.history.push({ id: uid(), date: new Date(baseDate.getTime() - 86400000 * 7).toISOString(), dayKey: 'mon', setIndex: 1, weight: 80, reps: 8 });
-      e1.history.push({ id: uid(), date: new Date(baseDate.getTime() - 86400000 * 7).toISOString(), dayKey: 'mon', setIndex: 2, weight: 80, reps: 7 });
-      e1.history.push({ id: uid(), date: new Date(baseDate.getTime() - 86400000 * 7).toISOString(), dayKey: 'mon', setIndex: 3, weight: 75, reps: 10 });
-      
-      e2.history.push({ id: uid(), date: new Date(baseDate.getTime() - 86400000 * 7).toISOString(), dayKey: 'mon', setIndex: 1, weight: null, reps: 10 });
-      e2.history.push({ id: uid(), date: new Date(baseDate.getTime() - 86400000 * 7).toISOString(), dayKey: 'mon', setIndex: 2, weight: null, reps: 9 });
-      e2.history.push({ id: uid(), date: new Date(baseDate.getTime() - 86400000 * 7).toISOString(), dayKey: 'mon', setIndex: 3, weight: null, reps: 8 });
-
-      state.days.mon.items.push({ exerciseId: e1.id, setCount: 3 });
-      state.days.mon.items.push({ exerciseId: e2.id, setCount: 3 });
-      
-      saveState(); 
-      toggleDrawer();
-      showToast('Nahrána demo data s historií z minulého týdne.', 'success');
-      render();
+  });
+}
+function currentSessionExercise(){return state.activeSession.exercises[state.activeSession.currentIndex]}
+function updateSessionSet(setIndex,field,value,rerender){
+  const se=currentSessionExercise(); if(!se?.sets?.[setIndex])return;
+  se.sets[setIndex][field]=value; saveState();
+  const totals=sessionTotals();
+  const v=document.getElementById('sessionVolume'), sets=document.getElementById('sessionSets');
+  if(v)v.textContent=formatKg(totals.total); if(sets)sets.textContent=totals.sets;
+  if(rerender)render();
+}
+function finishWorkout(){
+  const s=state.activeSession;if(!s)return;
+  const missing=[];
+  s.exercises.forEach((se,ei)=>{const ex=findExercise(se.exerciseId);se.sets.forEach((set,si)=>{
+    const hasAny=String(set.weight||'').trim()!=='' || String(set.reps||'').trim()!=='' || String(set.rpe||'').trim()!=='';
+    if(!hasAny) return;
+    if(!Number(set.reps)) missing.push(`${ex?.name||'Cvik'} série ${si+1}: reps`);
+    if(ex?.valueMode!=='bw' && (String(set.weight||'').trim()==='' || Number.isNaN(Number(set.weight)))) missing.push(`${ex?.name||'Cvik'} série ${si+1}: váha`);
+  })});
+  if(missing.length){return toast('Doplň chybějící údaje: '+missing.slice(0,3).join(', ')+(missing.length>3?'...':''),'warn')}
+  const rows=[]; let exerciseCount=0;
+  s.exercises.forEach((se,ei)=>{const ex=findExercise(se.exerciseId); if(!ex)return; let keptSets=[];
+    se.sets.forEach((set,si)=>{
+      const reps=Number(set.reps)||0; const hasAny=String(set.weight||'').trim()!=='' || reps || String(set.rpe||'').trim()!=='';
+      if(!hasAny)return;
+      const load=effectiveLoadForSet(ex,set,s.bodyWeight); const volume=load*reps;
+      const clean={setIndex:si+1,weight:ex.valueMode==='bw'?null:Number(set.weight),bodyWeight:ex.valueMode==='bw'?(Number(s.bodyWeight)||0):null,load,reps,rpe:set.rpe===''?null:Number(set.rpe),volume};
+      keptSets.push(clean);
+      rows.push({ex,se,clean});
     });
+    if(keptSets.length) exerciseCount++;
+  });
+  if(!rows.length)return toast('Není co ukládat. Vyplň aspoň jednu sérii.','warn');
+  const endedAt=new Date().toISOString(); const durationSec=Math.floor((new Date(endedAt)-new Date(s.startedAt))/1000);
+  const totalVolume=rows.reduce((sum,r)=>sum+r.clean.volume,0);
+  const externalVolume=rows.reduce((sum,r)=>sum+(findExercise(r.se.exerciseId)?.valueMode==='bw'?0:r.clean.volume),0);
+  const bwVolume=totalVolume-externalVolume;
+  const log={id:s.id,date:endedAt,dayKey:s.dayKey,startedAt:s.startedAt,endedAt,durationSec,bodyWeight:s.bodyWeight,totalVolume,externalVolume,bwVolume,setsCount:rows.length,exerciseCount,exercises:[]};
+  s.exercises.forEach((se,ei)=>{const ex=findExercise(se.exerciseId);if(!ex)return;const sets=[];rows.filter(r=>r.se===se).forEach(r=>sets.push(r.clean));if(sets.length)log.exercises.push({exerciseId:ex.id,name:ex.name,part:ex.part,valueMode:ex.valueMode,order:ei+1,sets});});
+  rows.forEach(r=>{const ex=findExercise(r.se.exerciseId);ex.history.push({id:uid(),date:endedAt,dayKey:s.dayKey,setIndex:r.clean.setIndex,weight:r.clean.weight,reps:r.clean.reps,rpe:r.clean.rpe,bodyWeight:r.clean.bodyWeight,load:r.clean.load,volume:r.clean.volume,sessionId:s.id})});
+  state.logs.push(log);
+  state.presets[s.dayKey].items=s.exercises.map(se=>({exerciseId:se.exerciseId,setCount:Math.max(1,se.sets.length)}));
+  state.activeSession=null; saveState(); view='logs'; toast(`Trénink uložený. Celkem ${formatKg(totalVolume)}.`, 'success'); render();
+}
 
-    document.getElementById('exportBtn').addEventListener('click', () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'training-log-export.json';
-      a.click();
-      URL.revokeObjectURL(a.href);
-      toggleDrawer();
-      showToast('Záloha dat byla stažena do vašeho zařízení.', 'success');
-    });
+function renderLogs(){
+  const best=bestTotalVolume();
+  const logs=[...state.logs].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  return `<section class="card"><div class="card-head"><h2>Log všech tréninků</h2><div class="row"><span class="pill good">PR objem: ${best?formatKg(best):'—'}</span><button id="exportAllCsv" class="ghost">Export všech CSV</button></div></div><div class="card-body"><div class="log-list">${logs.map(l=>renderLogItem(l,best)).join('')||'<div class="tiny">Zatím žádný uložený trénink.</div>'}</div></div></section>`;
+}
+function renderLogItem(log,best){
+  const pct=best?Math.round((log.totalVolume/best)*100):0;
+  const delta=best?log.totalVolume-best:0;
+  const isPr=best && Number(log.totalVolume)===Number(best);
+  return `<div class="log-item">
+    <div class="log-headline"><div><div class="log-title">${DAY_NAMES[log.dayKey]||log.dayKey} · ${dateTime(log.date)}</div><div class="log-meta">${log.exerciseCount} cviků · ${log.setsCount} sérií · ${formatDuration(log.durationSec)}</div></div><button data-export-log="${log.id}" class="primary">Export CSV</button></div>
+    <div class="log-metrics">
+      <div class="log-metric"><div class="t">Celkem</div><div class="v">${formatKg(log.totalVolume)}</div></div>
+      <div class="log-metric"><div class="t">Proti PR</div><div class="v">${isPr?'🏆 PR':(delta>=0?'+':'')+formatKg(delta)}</div></div>
+      <div class="log-metric"><div class="t">% z PR</div><div class="v">${pct}%</div></div>
+      <div class="log-metric"><div class="t">BW</div><div class="v">${log.bodyWeight?escapeHtml(log.bodyWeight)+' kg':'—'}</div></div>
+    </div>
+    <details><summary>Detail tréninku</summary><div class="table-wrap"><table><thead><tr><th>#</th><th>Cvik</th><th>Série</th><th>Váha</th><th>Reps</th><th>RPE</th><th>Objem</th></tr></thead><tbody>${log.exercises.map(e=>(e.sets||[]).map(s=>`<tr><td>${e.order}</td><td>${escapeHtml(e.name)}</td><td>${s.setIndex}</td><td>${e.valueMode==='bw'?'BW '+(s.bodyWeight||log.bodyWeight||''):(s.weight??'')}</td><td>${s.reps}</td><td>${s.rpe??''}</td><td>${formatKg(s.volume)}</td></tr>`).join('')).join('')}</tbody></table></div></details>
+  </div>`;
+}
+function bindLogs(){
+  document.querySelectorAll('[data-export-log]').forEach(btn=>btn.addEventListener('click',()=>exportWorkoutCsv(state.logs.find(l=>l.id===btn.dataset.exportLog))));
+  document.getElementById('exportAllCsv')?.addEventListener('click',()=>exportAllCsv());
+}
+function csvEscape(v){v=String(v??'');return /[";,\n]/.test(v)?'"'+v.replaceAll('"','""')+'"':v}
+function workoutRows(log){
+  const rows=[];
+  log.exercises.forEach(e=>(e.sets||[]).forEach(s=>rows.push({
+    session_id:log.id,date:log.date,day:DAY_NAMES[log.dayKey]||log.dayKey,duration_sec:log.durationSec,total_workout_volume:Math.round(log.totalVolume),body_weight:log.bodyWeight,
+    exercise_order:e.order,exercise:e.name,part:e.part,value_mode:e.valueMode,set_index:s.setIndex,weight:s.weight??'',bodyweight_for_set:s.bodyWeight??'',effective_load:s.load??'',reps:s.reps,rpe:s.rpe??'',set_volume:Math.round(s.volume||0)
+  })));
+  return rows;
+}
+function downloadCsv(filename,rows){
+  if(!rows.length)return toast('Není co exportovat.','warn');
+  const headers=Object.keys(rows[0]);
+  const csv='\ufeff'+headers.join(';')+'\n'+rows.map(r=>headers.map(h=>csvEscape(r[h])).join(';')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);
+}
+function exportWorkoutCsv(log){if(!log)return;downloadCsv(`trenink_${log.dayKey}_${log.date.slice(0,10)}.csv`,workoutRows(log));}
+function exportAllCsv(){downloadCsv('trenink_log_vsechny_treninky.csv',[...state.logs].sort((a,b)=>new Date(a.date)-new Date(b.date)).flatMap(workoutRows));}
 
-    document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+function renderDb(){
+  const grouped=groupedExercises();
+  return `<section class="card"><div class="card-head"><h2>Databáze cviků</h2><span class="pill">${state.exercises.length} cviků</span></div><div class="card-body">
+    <div class="grid3"><div><label>Název cviku</label><input id="newExName" placeholder="Např. Incline DB press"></div><div><label>Partie</label><input id="newExPart" placeholder="Např. Hrudník"></div><div><label>Typ odporu</label><select id="newExValue"><option value="weight">kg</option><option value="bw">BW</option></select></div></div>
+    <div class="row" style="margin-top:10px"><button id="addDbExercise" class="primary">Přidat cvik</button></div><div class="hr"></div>
+    <div class="grid"><div><label>Filtr partie</label><select id="dbPart">${renderPartOptions(state.ui.dbPartFilter)}</select></div><div><label>Hledat</label><input id="dbSearch" value="${escapeHtml(state.ui.dbSearch||'')}" placeholder="hledat cvik..."></div></div>
+    <div class="db-list" style="margin-top:12px">${Object.entries(grouped).map(([part,list])=>`<div class="card"><div class="card-head"><h3>${escapeHtml(part)}</h3><span class="pill">${list.length}</span></div><div class="card-body"><div class="db-list">${list.map(renderDbItem).join('')}</div></div></div>`).join('') || '<div class="tiny">Nic nenalezeno.</div>'}</div>
+  </div></section>`;
+}
+function groupedExercises(){
+  const q=(state.ui.dbSearch||'').toLowerCase(); const pf=state.ui.dbPartFilter||'all'; const groups={};
+  state.exercises.filter(ex=>(pf==='all'||ex.part===pf) && (`${ex.name} ${ex.part}`).toLowerCase().includes(q)).sort((a,b)=>(a.part||'').localeCompare(b.part||'','cs') || a.name.localeCompare(b.name,'cs')).forEach(ex=>{const p=ex.part||'Bez partie';(groups[p]||(groups[p]=[])).push(ex)});
+  return groups;
+}
+function renderDbItem(ex){const st=exerciseStats(ex);return `<div class="db-item"><div class="db-top"><div><div class="db-title">${escapeHtml(ex.name)}</div><div class="tiny">${escapeHtml(ex.part||'Bez partie')} · ${ex.valueMode==='bw'?'BW':'kg'} · historie: ${(ex.history||[]).length} setů</div><div class="tiny">PR: ${ex.valueMode==='bw'?'':formatPerf(ex,st.bestWeight,'weight')+' · '} ${formatPerf(ex,st.bestReps,'reps')} · ${formatPerf(ex,st.bestVolume,'volume')}</div></div><button data-del-db="${ex.id}" class="danger">Smazat</button></div><details><summary>Historie</summary><div class="table-wrap"><table><thead><tr><th>Datum</th><th>Den</th><th>Série</th><th>Váha</th><th>Reps</th><th>RPE</th><th>Objem</th></tr></thead><tbody>${[...(ex.history||[])].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(h=>`<tr><td>${dateOnly(h.date)}</td><td>${DAY_NAMES[h.dayKey]||h.dayKey}</td><td>${h.setIndex}</td><td>${ex.valueMode==='bw'?'BW '+(h.bodyWeight||''):(h.weight??'')}</td><td>${h.reps}</td><td>${h.rpe??''}</td><td>${formatKg(h.volume||setVolume(ex,h,h.bodyWeight))}</td></tr>`).join('')||'<tr><td colspan="7">Bez historie</td></tr>'}</tbody></table></div></details></div>`}
+function bindDb(){
+  document.getElementById('dbPart')?.addEventListener('change',e=>{state.ui.dbPartFilter=e.target.value;saveState();render()});
+  document.getElementById('dbSearch')?.addEventListener('input',e=>{state.ui.dbSearch=e.target.value;saveState();render()});
+  document.getElementById('addDbExercise')?.addEventListener('click',()=>{
+    const name=document.getElementById('newExName').value.trim(), part=document.getElementById('newExPart').value.trim(), value=document.getElementById('newExValue').value;
+    if(!name)return toast('Zadej název cviku.','warn');
+    if(state.exercises.some(e=>e.name.toLowerCase()===name.toLowerCase()))return toast('Tenhle cvik už existuje.','warn');
+    state.exercises.push({id:uid(),name,part,trackMode:value==='bw'?'reps':'both',valueMode:value,history:[]});saveState();toast('Cvik přidaný.','success');render();
+  });
+  document.querySelectorAll('[data-del-db]').forEach(btn=>btn.addEventListener('click',()=>{
+    const ex=findExercise(btn.dataset.delDb); if(!ex)return;
+    if(!confirm(`Smazat cvik „${ex.name}“ včetně historie?`))return;
+    state.exercises=state.exercises.filter(e=>e.id!==ex.id); for(const d of DAYS){state.presets[d.key].items=state.presets[d.key].items.filter(i=>i.exerciseId!==ex.id)}; saveState(); render();
+  }));
+}
 
-    document.getElementById('importFile').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      try {
-        state = migrateState(JSON.parse(await file.text()));
-        saveState();
-        toggleDrawer();
-        showToast('Všechna data byla úspěšně naimportována!', 'success');
-        render();
-      } catch (err) {
-        console.error(err);
-        showToast('Import se nezdařil. Soubor pravděpodobně nemá správnou strukturu.', 'error');
-      } finally {
-        e.target.value = '';
-      }
-    });
+function bindCommon(){
+  document.getElementById('menuBtn').onclick=toggleDrawer;
+  document.getElementById('closeDrawer').onclick=toggleDrawer;
+  document.getElementById('drawerOverlay').onclick=toggleDrawer;
+  document.querySelectorAll('[data-nav]').forEach(btn=>btn.onclick=()=>{view=btn.dataset.nav;toggleDrawer(false);render()});
+  document.getElementById('exportJsonBtn').onclick=exportJson;
+  document.getElementById('importJsonBtn').onclick=()=>document.getElementById('importFile').click();
+  document.getElementById('importFile').onchange=importJson;
+  document.getElementById('resetBtn').onclick=()=>{if(confirm('Opravdu smazat všechna lokální data aplikace?')){localStorage.removeItem(STORAGE_KEY);state=defaultState();view='setup';toggleDrawer(false);saveState();render()}};
+  document.getElementById('seedDbBtn').onclick=seedBaseDb;
+}
+function toggleDrawer(force){
+  const d=document.getElementById('drawer'), o=document.getElementById('drawerOverlay');
+  const open=typeof force==='boolean'?force:!d.classList.contains('open');
+  d.classList.toggle('open',open); o.classList.toggle('open',open);
+}
+function exportJson(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='trenink-log-v7-zaloha.json'; a.click(); URL.revokeObjectURL(a.href); toggleDrawer(false); toast('JSON záloha stažená.','success');
+}
+async function importJson(e){
+  const file=e.target.files[0]; if(!file)return;
+  try{state=migrateState(JSON.parse(await file.text())); saveState(); view='setup'; toggleDrawer(false); toast('Import hotový.','success'); render();}
+  catch(err){console.error(err);toast('Import se nepovedl.','danger')} finally{e.target.value=''}
+}
+function seedBaseDb(){
+  if(state.exercises.length && !confirm('Databáze už má cviky. Přidat jen chybějící základní cviky?'))return;
+  const base={
+    'Hrudník':['Bench press','Incline bench press','DB bench press','Incline DB press','Multipress bench press','Multipress incline press','Cable fly','Low to high cable fly','Kliky|bw','Dipy na prsa|bw'],
+    'Záda':['Shyby nadhmatem|bw','Shyby podhmatem|bw','Přítahy velké činky v předklonu','Pendlay row','Jednoruční přítah jednoručky','Seated cable row','Lat pulldown','Straight arm pulldown','Rumunský mrtvý tah','Mrtvý tah'],
+    'Ramena':['Military press s osou','DB shoulder press','Multipress shoulder press','Upažování s jednoručkami','Upažování na kladce','Rear delt fly','Reverse fly na kladce','Face pull'],
+    'Biceps':['Bicepsový zdvih s osou','DB alternating curl','Hammer curl','Incline DB curl','Cable curl jednoruč','Bayesian cable curl'],
+    'Triceps':['Triceps pushdown','Overhead triceps extension','Francouzský tlak','Bench dip|bw','Kliky na úzko|bw','Skull crushers'],
+    'Nohy':['Dřep s osou','Front squat','Multipress squat','Bulgarian split squat','Goblet squat','Výpady','Step-up','Rumunský mrtvý tah','Zakopávání na kladce vestoje','Hip thrust s osou','Výpony ve stoje s jednoručkami'],
+    'Core':['Ab wheel rollout|bw','Plank|bw','Side plank|bw','Hanging knee raise|bw','Hanging leg raise|bw','Cable crunch','Woodchopper','Russian twist s kettlebellem']
+  };
+  let added=0;
+  Object.entries(base).forEach(([part,names])=>names.forEach(raw=>{const [name,mode]=raw.split('|'); if(state.exercises.some(e=>e.name.toLowerCase()===name.toLowerCase()))return; state.exercises.push({id:uid(),name,part,trackMode:mode==='bw'?'reps':'both',valueMode:mode==='bw'?'bw':'weight',history:[]}); added++;}));
+  saveState();toggleDrawer(false);toast(`Přidáno ${added} cviků.`, added?'success':'warn');render();
+}
 
-    render();
-  </script>
+render();
+</script>
 </body>
 </html>
